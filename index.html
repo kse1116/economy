@@ -28,7 +28,53 @@
     button { border: 0; cursor: pointer; transition: transform 0.1s ease, opacity 0.1s ease; }
     button:active { transform: scale(0.97); opacity: 0.8; }
 
-    .app { max-width: 580px; margin: 0 auto; min-height: 100vh; padding-bottom: 50px; }
+    .app { max-width: 580px; margin: 0 auto; min-height: 100vh; padding-bottom: 50px; display: none; }
+    .app.ready { display: block; }
+
+    /* 잠금 화면 (외부인 차단용) */
+    .lock-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px; text-align: center; z-index: 300;
+    }
+    .lock-screen.show { display: flex; }
+    .lock-card {
+      background: var(--card); border-radius: 22px; padding: 32px 24px;
+      max-width: 360px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border: 0.5px solid var(--border);
+    }
+
+    /* 최초 1회 프로필 생성 모달 */
+    .profile-screen {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; z-index: 250;
+    }
+    .profile-screen.show { display: flex; }
+    .profile-card {
+      background: var(--card); border-radius: 24px; padding: 28px 22px;
+      max-width: 380px; width: 100%; text-align: center;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.15);
+    }
+    .avatar-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      margin: 16px 0;
+    }
+    .avatar-option {
+      font-size: 26px; padding: 10px 0; border-radius: 14px;
+      background: #f2f2f7; border: 2px solid transparent; cursor: pointer;
+    }
+    .avatar-option.selected {
+      border-color: var(--primary); background: rgba(0, 122, 255, 0.08);
+    }
+    .existing-members {
+      display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px;
+    }
+    .existing-chip {
+      font-size: 12px; padding: 5px 10px; border-radius: 12px;
+      background: #f2f2f7; color: var(--text-sub); font-weight: 600; cursor: pointer;
+    }
 
     /* 애플 블러 상단바 */
     .header {
@@ -41,13 +87,11 @@
     }
     .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
-    .header-actions { display: flex; gap: 6px; }
     
     .badge-btn {
-      font-size: 13px; font-weight: 600; padding: 5px 11px;
+      font-size: 13px; font-weight: 600; padding: 6px 12px;
       border-radius: 16px; background: rgba(0, 122, 255, 0.1); color: var(--primary);
     }
-    .badge-btn.pin { background: rgba(142, 142, 147, 0.15); color: #48484a; }
 
     /* 애플 세그먼트 컨트롤 탭 */
     .segmented-tabs {
@@ -180,14 +224,47 @@
 
 <div id="loading" class="loading">동기화 중...</div>
 
-<div class="app">
+<!-- 1. 외부인 차단 화면 (시크릿 링크 없이 접속 시) -->
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-card">
+    <div style="font-size: 42px; margin-bottom: 12px;">🔒</div>
+    <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">멤버 전용 공간입니다</div>
+    <div style="font-size: 13px; color: var(--text-sub); line-height: 1.6;">
+      채팅방 공지에 등록된<br><b>전용 초대 링크</b>를 통해 접속해 주세요.
+    </div>
+  </div>
+</div>
+
+<!-- 2. 최초 1회 프로필 설정 모달 -->
+<div id="profileScreen" class="profile-screen">
+  <div class="profile-card">
+    <div style="font-size: 19px; font-weight: 700; margin-bottom: 6px;">프로필 설정</div>
+    <div style="font-size: 13px; color: var(--text-sub);">처음 한 번만 설정하면 이후 자동으로 로그인됩니다.</div>
+    
+    <div class="avatar-grid" id="avatarGrid">
+      <div class="avatar-option selected" onclick="selectAvatar('🐶', this)">🐶</div>
+      <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
+      <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
+      <div class="avatar-option" onclick="selectAvatar('🐻', this)">🐻</div>
+      <div class="avatar-option" onclick="selectAvatar('🐼', this)">🐼</div>
+      <div class="avatar-option" onclick="selectAvatar('🐯', this)">🐯</div>
+      <div class="avatar-option" onclick="selectAvatar('😎', this)">😎</div>
+      <div class="avatar-option" onclick="selectAvatar('👑', this)">👑</div>
+    </div>
+
+    <input id="profileNameInput" class="input" placeholder="사용할 이름 또는 닉네임 입력" style="text-align:center; font-weight:600; margin-bottom:8px;">
+    <div id="existingMemberBox" class="existing-members"></div>
+
+    <button class="btn-main" onclick="saveProfile()" style="margin-top:14px;">시작하기</button>
+  </div>
+</div>
+
+<!-- 3. 메인 앱 화면 -->
+<div id="mainApp" class="app">
   <header class="header">
     <div class="header-top">
       <div class="header-title">🏛️ 경제연구소</div>
-      <div class="header-actions">
-        <button id="userBadge" class="badge-btn" onclick="changeUserName()">👤 이름</button>
-        <button class="badge-btn pin" onclick="changePin()">🔒 PIN</button>
-      </div>
+      <button id="userBadge" class="badge-btn" onclick="openProfileSetup()">👤 프로필</button>
     </div>
     <div class="segmented-tabs">
       <button id="tab-schedule" class="tab-btn active" onclick="switchTab('schedule')">📅 일정</button>
@@ -197,7 +274,6 @@
   </header>
 
   <main class="content">
-    <!-- 상단 대표 비주얼 일러스트 배너 -->
     <div class="hero-banner">
       <img src="banner.png" alt="경제연구소 글로벌 경제 전략 세미나" onerror="this.parentElement.style.display='none';">
     </div>
@@ -271,66 +347,110 @@
 <script>
   const API_URL = "https://economy.insightview.workers.dev";
 
-  let appPin = localStorage.getItem('app_pin') || '';
+  // 1. URL 파라미터에서 시크릿 키 추출 및 주소창 깔끔하게 정리
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlKey = urlParams.get('key');
+  if (urlKey) {
+    localStorage.setItem('app_secret_key', urlKey.trim());
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  let secretKey = localStorage.getItem('app_secret_key') || '';
   let userName = localStorage.getItem('app_username') || '';
+  let userAvatar = localStorage.getItem('app_avatar') || '🐶';
+  let selectedAvatar = userAvatar;
+
   let schedules = [], settlements = [], memos = [], chatMembers = [];
   let editType = '', editId = null;
 
-  async function checkAuth() {
-    while (!appPin) {
-      const input = prompt("🔒 비밀번호(PIN)를 입력하세요:", "");
-      if (input && input.trim()) {
-        appPin = input.trim();
-        try {
-          const res = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'checkPin', pin: appPin })
-          });
-          const data = await res.json();
-          if (data.ok) {
-            localStorage.setItem('app_pin', appPin);
-            break;
-          } else {
-            alert("비밀번호가 일치하지 않습니다.");
-            appPin = '';
-          }
-        } catch(e) {
-          alert("서버 연결에 실패했습니다.");
-          appPin = '';
-        }
+  async function initApp() {
+    if (!secretKey) {
+      document.getElementById("lockScreen").classList.add("show");
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verifyKey', key: secretKey })
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        localStorage.removeItem('app_secret_key');
+        document.getElementById("lockScreen").classList.add("show");
+        return;
       }
+    } catch (e) {
+      alert("서버와 통신할 수 없습니다.");
+      return;
     }
 
+    // 인증 통과 -> 메인 앱 활성화
+    document.getElementById("mainApp").classList.add("ready");
+
+    const t = today();
+    ['scheduleDate', 'settlementDate', 'memoDate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = t;
+    });
+
+    // 프로필이 없으면 최초 1회 프로필 생성 화면 표시, 있으면 즉시 자동 로그인
     if (!userName) {
-      userName = prompt("본인 이름을 입력해주세요 (수정/등록 이력에 사용됩니다):", "S K");
-      if (!userName || !userName.trim()) userName = "익명";
-      userName = userName.trim();
-      localStorage.setItem('app_username', userName);
-    }
-    document.getElementById("userBadge").textContent = "👤 " + userName;
-  }
-
-  function changeUserName() {
-    const newName = prompt("변경할 이름을 입력하세요:", userName);
-    if (newName && newName.trim()) {
-      userName = newName.trim();
-      localStorage.setItem('app_username', userName);
-      document.getElementById("userBadge").textContent = "👤 " + userName;
+      await openProfileSetup();
+    } else {
+      updateUserBadge();
+      switchTab('schedule');
     }
   }
 
-  function changePin() {
-    const newPin = prompt("새 PIN 번호를 입력하세요:", "");
-    if (newPin && newPin.trim()) {
-      localStorage.setItem('app_pin', newPin.trim());
-      location.reload();
+  function selectAvatar(emoji, el) {
+    selectedAvatar = emoji;
+    document.querySelectorAll('.avatar-option').forEach(btn => btn.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  async function openProfileSetup() {
+    document.getElementById("profileNameInput").value = userName;
+    try {
+      const res = await api('getChatMembers');
+      chatMembers = res.data || [];
+      const box = document.getElementById("existingMemberBox");
+      if (chatMembers.length) {
+        box.innerHTML = `<div style="width:100%; font-size:11px; color:var(--text-sub); margin-top:4px;">기존 멤버 선택</div>` +
+          chatMembers.map(m => `<span class="existing-chip" onclick="document.getElementById('profileNameInput').value='${m}'">${m}</span>`).join('');
+      }
+    } catch(e) {}
+    document.getElementById("profileScreen").classList.add("show");
+  }
+
+  async function saveProfile() {
+    const inputName = document.getElementById("profileNameInput").value.trim();
+    if (!inputName) return alert("사용하실 이름을 입력해주세요.");
+
+    showLoading(true);
+    try {
+      userName = inputName;
+      userAvatar = selectedAvatar;
+      localStorage.setItem('app_username', userName);
+      localStorage.setItem('app_avatar', userAvatar);
+
+      await api('registerMember', { name: userName });
+      updateUserBadge();
+      document.getElementById("profileScreen").classList.remove("show");
+      switchTab('schedule');
+    } finally {
+      showLoading(false);
     }
+  }
+
+  function updateUserBadge() {
+    document.getElementById("userBadge").textContent = `${userAvatar} ${userName}`;
   }
 
   async function api(action, payload = {}) {
     payload.action = action;
-    payload.pin = appPin;
+    payload.key = secretKey;
     payload.user = userName;
 
     const res = await fetch(API_URL, {
@@ -341,8 +461,7 @@
     const data = await res.json();
     if (!data.ok) {
       if (res.status === 401) {
-        localStorage.removeItem('app_pin');
-        alert("비밀번호가 맞지 않습니다.");
+        localStorage.removeItem('app_secret_key');
         location.reload();
       }
       throw new Error(data.error || '오류가 발생했습니다.');
@@ -575,15 +694,7 @@
     } finally { showLoading(false); }
   }
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    await checkAuth();
-    const t = today();
-    ['scheduleDate', 'settlementDate', 'memoDate'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = t;
-    });
-    switchTab('schedule');
-  });
+  document.addEventListener("DOMContentLoaded", initApp);
 </script>
 </body>
 </html>
