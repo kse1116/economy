@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>우리 모임 관리보드</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; background: #f3f4f6; color: #111827; }
+    button, input, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    .app { min-height: 100vh; padding-bottom: 76px; }
+    .header { background: #ffffff; padding: 16px 18px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 20; }
+    .header-row { display: flex; align-items: center; justify-content: space-between; }
+    .title { font-size: 19px; font-weight: 800; }
+    .user-badge-group { display: flex; gap: 6px; }
+    .tag-btn { font-size: 12px; color: #4338ca; background: #eef2ff; padding: 5px 9px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .content { padding: 16px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .menu-card { background: white; border-radius: 16px; padding: 18px 12px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .menu-card:active { transform: scale(0.97); }
+    .menu-icon { font-size: 26px; margin-bottom: 6px; }
+    .menu-title { font-weight: 800; font-size: 14px; }
+    .menu-desc { color: #6b7280; font-size: 11px; margin-top: 4px; }
+    .list { display: flex; flex-direction: column; gap: 10px; }
+    .item { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .item-main { font-weight: 700; font-size: 15px; line-height: 1.45; }
+    .item-meta { color: #6b7280; font-size: 12px; margin-top: 7px; line-height: 1.5; }
+    .item-actions { display: flex; gap: 7px; margin-top: 11px; }
+    .small-btn { padding: 8px 12px; border-radius: 9px; background: #f3f4f6; color: #374151; font-size: 12px; font-weight: 700; }
+    .small-btn.delete { background: #fee2e2; color: #b91c1c; }
+    .primary-btn { width: 100%; padding: 13px; border-radius: 13px; background: #111827; color: white; font-weight: 800; margin-bottom: 12px; }
+    .secondary-btn { width: 100%; padding: 12px; border-radius: 13px; background: white; color: #111827; font-weight: 700; border: 1px solid #e5e7eb; }
+    .form { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; }
+    .form-title { font-size: 16px; font-weight: 800; margin-bottom: 13px; }
+    .field { margin-bottom: 11px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: #4b5563; margin-bottom: 5px; }
+    .field input, .field textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; background: white; outline: none; }
+    .field textarea { min-height: 90px; resize: vertical; }
+    .empty { background: white; border-radius: 15px; padding: 30px 16px; text-align: center; color: #9ca3af; font-size: 13px; }
+    .calc-panel { background: #1e293b; color: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; }
+    .member-chip { display: inline-flex; align-items: center; gap: 6px; background: #334155; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #f8fafc; cursor: pointer; }
+    .member-chip input { width: 15px; height: 15px; accent-color: #38bdf8; }
+    .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; height: 64px; background: rgba(255,255,255,0.98); border-top: 1px solid #e5e7eb; display: grid; grid-template-columns: repeat(4, 1fr); z-index: 50; }
+    .nav-btn { background: transparent; color: #9ca3af; font-size: 11px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+    .nav-btn.active { color: #111827; font-weight: 800; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: flex-end; z-index: 80; }
+    .modal.show { display: flex; }
+    .modal-box { background: white; width: 100%; max-height: 90vh; overflow-y: auto; border-radius: 22px 22px 0 0; padding: 20px; }
+    .loading { position: fixed; inset: 0; background: rgba(255,255,255,0.7); display: none; align-items: center; justify-content: center; z-index: 100; font-weight: 700; }
+    .loading.show { display: flex; }
+  </style>
+</head>
+<body>
+
+<div id="loading" class="loading">처리 중...</div>
+
+<div class="app">
+  <header class="header">
+    <div class="header-row">
+      <div class="title">📋 모임 관리보드</div>
+      <div class="user-badge-group">
+        <div id="userBadge" class="tag-btn" onclick="changeUserName()">👤 이름</div>
+        <div class="tag-btn" onclick="changePin()" style="background:#fef3c7; color:#92400e;">🔒 PIN</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- 홈 -->
+    <section id="page-home" class="page active">
+      <div style="background:#111827; color:white; border-radius:18px; padding:18px;">
+        <div style="font-size:18px; font-weight:800; margin-bottom:4px;">대시보드</div>
+        <div style="font-size:12px; opacity:0.8;">일정·정산·메모를 한눈에 관리하세요.</div>
+      </div>
+      
+      <div class="card-grid">
+        <button class="menu-card" onclick="showPage('schedule')"><div class="menu-icon">📅</div><div class="menu-title">일정</div><div class="menu-desc">일정 관리</div></button>
+        <button class="menu-card" onclick="showPage('settlement')"><div class="menu-icon">💰</div><div class="menu-title">정산</div><div class="menu-desc">N빵 계산</div></button>
+        <button class="menu-card" onclick="showPage('memo')"><div class="menu-icon">📝</div><div class="menu-title">메모</div><div class="menu-desc">공유 메모</div></button>
+      </div>
+
+      <div style="font-weight:800; margin:22px 0 10px;">오늘의 일정</div>
+      <div id="homeSchedules"></div>
+    </section>
+
+    <!-- 일정 -->
+    <section id="page-schedule" class="page">
+      <div class="form">
+        <div class="form-title">일정 추가</div>
+        <div class="field"><label>날짜</label><input id="scheduleDate" type="date"></div>
+        <div class="field"><label>시간</label><input id="scheduleTime" type="time"></div>
+        <div class="field"><label>내용</label><input id="scheduleTitle" placeholder="일정 입력"></div>
+        <button class="primary-btn" onclick="addSchedule()">등록</button>
+      </div>
+      <div style="font-weight:800; margin-bottom:10px;">일정 목록</div>
+      <div id="scheduleList" class="list"></div>
+    </section>
+
+    <!-- 정산 -->
+    <section id="page-settlement" class="page">
+      <div class="calc-panel">
+        <div style="font-weight:800; margin-bottom:8px;">💡 스마트 N빵 계산기</div>
+        <div style="font-size:12px; color:#cbd5e1; margin-bottom:6px;">참여 인원 선택</div>
+        <div id="memberCheckboxContainer" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;"></div>
+        <div style="display:flex; justify-content:space-between;">
+          <button class="small-btn" onclick="toggleSelectAllSettlements()" style="background:#334155; color:white;">전체선택/해제</button>
+          <button class="small-btn" onclick="runSettlementCalc()" style="background:#38bdf8; color:#0f172a; font-weight:800;">송금 계산</button>
+        </div>
+        <div id="calcResultBox" style="margin-top:12px; display:none; border-top:1px solid #334155; padding-top:10px;"></div>
+      </div>
+      <div class="form">
+        <div class="form-title">새 지출 등록</div>
+        <div class="field"><label>날짜</label><input id="settlementDate" type="date"></div>
+        <div class="field"><label>내용</label><input id="settlementContent" placeholder="예: 회식 1차"></div>
+        <div class="field"><label>금액</label><input id="settlementAmount" type="number" placeholder="예: 50000"></div>
+        <div class="field"><label>비고</label><input id="settlementNote" placeholder="선택사항"></div>
+        <button class="primary-btn" onclick="addSettlement()">지출 등록</button>
+      </div>
+      <div style="font-weight:800; margin-bottom:10px;">지출 내역</div>
+      <div id="settlementList" class="list"></div>
+    </section>
+
+    <!-- 메모 -->
+    <section id="page-memo" class="page">
+      <div class="form">
+        <div class="form-title">메모 작성</div>
+        <div class="field"><label>날짜</label><input id="memoDate" type="date"></div>
+        <div class="field"><label>메모</label><textarea id="memoText" placeholder="내용을 입력하세요"></textarea></div>
+        <button class="primary-btn" onclick="addMemo()">메모 등록</button>
+      </div>
+      <div style="font-weight:800; margin-bottom:10px;">메모 목록</div>
+      <div id="memoList" class="list"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button id="nav-home" class="nav-btn active" onclick="showPage('home')">🏠홈</button>
+    <button id="nav-schedule" class="nav-btn" onclick="showPage('schedule')">📅일정</button>
+    <button id="nav-settlement" class="nav-btn" onclick="showPage('settlement')">💰정산</button>
+    <button id="nav-memo" class="nav-btn" onclick="showPage('memo')">📝메모</button>
+  </nav>
+</div>
+
+<!-- 수정 모달 -->
+<div id="editModal" class="modal">
+  <div class="modal-box">
+    <div id="modalFields"></div>
+    <button class="primary-btn" onclick="saveEdit()">저장</button>
+    <button class="secondary-btn" onclick="closeModal()">취소</button>
+  </div>
+</div>
+
+<script>
+  // ⭐ [필수] 본인의 Cloudflare Worker 주소로 변경하세요!
+  const API_URL = "https://emergency-api.본인워커주소.workers.dev";
+
+  let appPin = localStorage.getItem('app_pin') || '';
+  let userName = localStorage.getItem('app_username') || '';
+  let schedules = [], settlements = [], memos = [], chatMembers = [];
+  let editType = '', editId = null;
+
+  async function checkAuth() {
+    // 1. PIN 번호 확인
+    while (!appPin) {
+      const input = prompt("🔒 모임 비밀번호(PIN)를 입력하세요:", "");
+      if (input && input.trim()) {
+        appPin = input.trim();
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'checkPin', pin: appPin })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            localStorage.setItem('app_pin', appPin);
+            break;
+          } else {
+            alert("비밀번호가 맞지 않습니다.");
+            appPin = '';
+          }
+        } catch(e) {
+          alert("서버 연결 실패. 다시 시도해주세요.");
+          appPin = '';
+        }
+      }
+    }
+
+    // 2. 사용자 이름 확인
+    if (!userName) {
+      userName = prompt("본인 이름을 입력해주세요 (등록자로 사용됩니다):", "S K");
+      if (!userName || !userName.trim()) userName = "익명";
+      userName = userName.trim();
+      localStorage.setItem('app_username', userName);
+    }
+    document.getElementById("userBadge").textContent = "👤 " + userName;
+  }
+
+  function changeUserName() {
+    const newName = prompt("변경할 이름을 입력하세요:", userName);
+    if (newName && newName.trim()) {
+      userName = newName.trim();
+      localStorage.setItem('app_username', userName);
+      document.getElementById("userBadge").textContent = "👤 " + userName;
+    }
+  }
+
+  function changePin() {
+    const newPin = prompt("새로 등록할 PIN 번호를 입력하세요:", "");
+    if (newPin && newPin.trim()) {
+      localStorage.setItem('app_pin', newPin.trim());
+      location.reload();
+    }
+  }
+
+  async function api(action, payload = {}) {
+    payload.action = action;
+    payload.pin = appPin;
+    payload.user = payload.user || userName;
+
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      if (res.status === 401) {
+        localStorage.removeItem('app_pin');
+        alert("비밀번호가 올바르지 않습니다. 다시 입력해주세요.");
+        location.reload();
+      }
+      throw new Error(data.error || '오류가 발생했습니다.');
+    }
+    return data;
+  }
+
+  function showLoading(show) { document.getElementById("loading").classList.toggle("show", show); }
+  function today() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0'); }
+
+  function showPage(page) {
+    document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+    const p = document.getElementById("page-" + page);
+    const n = document.getElementById("nav-" + page);
+    if (p) p.classList.add("active");
+    if (n) n.classList.add("active");
+
+    if (page === 'home') loadHome();
+    if (page === 'schedule') loadSchedules();
+    if (page === 'settlement') loadSettlements();
+    if (page === 'memo') loadMemos();
+  }
+
+  /* 홈 */
+  async function loadHome() {
+    try {
+      const res = await api('getSchedules');
+      schedules = res.data || [];
+      const t = today();
+      const todayList = schedules.filter(s => s.date === t);
+      const box = document.getElementById("homeSchedules");
+      if (!todayList.length) box.innerHTML = '<div class="empty">오늘 예정된 일정이 없습니다.</div>';
+      else box.innerHTML = todayList.map(s => `<div class="item"><b>${s.time || ''} ${s.title}</b> (${s.user})</div>`).join('');
+    } catch(e) {}
+  }
+
+  /* 일정 */
+  async function loadSchedules() {
+    const res = await api('getSchedules');
+    schedules = res.data || [];
+    const box = document.getElementById("scheduleList");
+    if (!schedules.length) box.innerHTML = '<div class="empty">등록된 일정이 없습니다.</div>';
+    else box.innerHTML = schedules.map(s => `
+      <div class="item">
+        <div class="item-main">📅 ${s.date} ${s.time ? '· '+s.time : ''}<br>${s.title}</div>
+        <div class="item-meta">등록자: ${s.user}</div>
+        <div class="item-actions">
+          <button class="small-btn" onclick="openEdit('schedule', ${s.id})">수정</button>
+          <button class="small-btn delete" onclick="deleteSchedule(${s.id})">삭제</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function addSchedule() {
+    const date = document.getElementById("scheduleDate").value;
+    const time = document.getElementById("scheduleTime").value;
+    const title = document.getElementById("scheduleTitle").value.trim();
+    if (!date || !title) return alert("날짜와 일정을 입력하세요.");
+    showLoading(true);
+    try {
+      await api('addSchedule', { date, time, title });
+      document.getElementById("scheduleTitle").value = '';
+      await loadSchedules();
+    } finally { showLoading(false); }
+  }
+
+  async function deleteSchedule(id) {
+    if (!confirm("삭제하시겠습니까?")) return;
+    showLoading(true);
+    try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
+  }
+
+  /* 정산 */
+  async function loadSettlements() {
+    const [sRes, mRes] = await Promise.all([api('getSettlements'), api('getChatMembers')]);
+    settlements = sRes.data || [];
+    chatMembers = mRes.data || [];
+
+    const memberContainer = document.getElementById("memberCheckboxContainer");
+    memberContainer.innerHTML = chatMembers.map(m => `
+      <label class="member-chip"><input type="checkbox" class="calc-m" value="${m}" checked>${m}</label>
+    `).join('');
+
+    const box = document.getElementById("settlementList");
+    if (!settlements.length) box.innerHTML = '<div class="empty">지출 내역이 없습니다.</div>';
+    else box.innerHTML = settlements.map(s => `
+      <div class="item">
+        <div style="display:flex; gap:10px;">
+          <input type="checkbox" class="calc-s" value="${s.id}" checked style="width:20px;">
+          <div style="flex:1;">
+            <div class="item-main">💰 ${s.content}</div>
+            <div class="item-meta">${s.date} · <b>${Number(s.amount).toLocaleString()}원</b> (결제: ${s.user})</div>
+          </div>
+        </div>
+        <div class="item-actions" style="margin-left:30px;">
+          <button class="small-btn" onclick="openEdit('settlement', ${s.id})">수정</button>
+          <button class="small-btn delete" onclick="deleteSettlement(${s.id})">삭제</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function addSettlement() {
+    const date = document.getElementById("settlementDate").value;
+    const content = document.getElementById("settlementContent").value.trim();
+    const amount = document.getElementById("settlementAmount").value;
+    const note = document.getElementById("settlementNote").value.trim();
+    if (!date || !content || !amount) return alert("필수 항목을 입력하세요.");
+    showLoading(true);
+    try {
+      await api('addSettlement', { date, content, amount, note });
+      document.getElementById("settlementContent").value = '';
+      document.getElementById("settlementAmount").value = '';
+      await loadSettlements();
+    } finally { showLoading(false); }
+  }
+
+  async function deleteSettlement(id) {
+    if (!confirm("삭제하시겠습니까?")) return;
+    showLoading(true);
+    try { await api('deleteSettlement', { id }); await loadSettlements(); } finally { showLoading(false); }
+  }
+
+  function toggleSelectAllSettlements() {
+    const cbs = document.querySelectorAll(".calc-s");
+    const any = Array.from(cbs).some(c => !c.checked);
+    cbs.forEach(c => c.checked = any);
+  }
+
+  async function runSettlementCalc() {
+    const sIds = Array.from(document.querySelectorAll(".calc-s:checked")).map(c => c.value).join(',');
+    const mems = Array.from(document.querySelectorAll(".calc-m:checked")).map(c => c.value).join(',');
+    if (!sIds || !mems) return alert("지출 항목과 인원을 1개 이상 선택하세요.");
+    showLoading(true);
+    try {
+      const res = await api('calculateSettlement', { selectedIds: sIds, participants: mems });
+      const box = document.getElementById("calcResultBox");
+      box.style.display = 'block';
+      let html = `<div style="font-size:13px; line-height:1.6;">총 <b>${res.totalAmount.toLocaleString()}원</b> / ${res.memberCount}명 (1인당 <b>${res.perPerson.toLocaleString()}원</b>)<br><br>`;
+      if (res.transfers.length) {
+        html += '<b>👉 송금 안내:</b><br>' + res.transfers.map(t => `• ${t.from} ➡️ ${t.to}: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
+      } else html += '추가 정산이 필요 없습니다.';
+      html += '</div>';
+      box.innerHTML = html;
+    } finally { showLoading(false); }
+  }
+
+  /* 메모 */
+  async function loadMemos() {
+    const res = await api('getMemos');
+    memos = res.data || [];
+    const box = document.getElementById("memoList");
+    if (!memos.length) box.innerHTML = '<div class="empty">메모가 없습니다.</div>';
+    else box.innerHTML = memos.map(m => `
+      <div class="item">
+        <div class="item-main" style="white-space:pre-wrap;">📝 ${m.memo}</div>
+        <div class="item-meta">${m.date} · 작성자: ${m.user}</div>
+        <div class="item-actions">
+          <button class="small-btn" onclick="openEdit('memo', ${m.id})">수정</button>
+          <button class="small-btn delete" onclick="deleteMemo(${m.id})">삭제</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function addMemo() {
+    const date = document.getElementById("memoDate").value;
+    const memo = document.getElementById("memoText").value.trim();
+    if (!date || !memo) return alert("내용을 입력하세요.");
+    showLoading(true);
+    try {
+      await api('addMemo', { date, memo });
+      document.getElementById("memoText").value = '';
+      await loadMemos();
+    } finally { showLoading(false); }
+  }
+
+  async function deleteMemo(id) {
+    if (!confirm("삭제하시겠습니까?")) return;
+    showLoading(true);
+    try { await api('deleteMemo', { id }); await loadMemos(); } finally { showLoading(false); }
+  }
+
+  /* 수정 모달 */
+  function openEdit(type, id) {
+    editType = type; editId = id;
+    const fields = document.getElementById("modalFields");
+    if (type === 'schedule') {
+      const s = schedules.find(x => x.id === id);
+      fields.innerHTML = `
+        <div class="field"><label>날짜</label><input id="eDate" type="date" value="${s.date}"></div>
+        <div class="field"><label>시간</label><input id="eTime" type="time" value="${s.time}"></div>
+        <div class="field"><label>내용</label><input id="eTitle" value="${s.title}"></div>
+      `;
+    } else if (type === 'settlement') {
+      const s = settlements.find(x => x.id === id);
+      fields.innerHTML = `
+        <div class="field"><label>날짜</label><input id="eDate" type="date" value="${s.date}"></div>
+        <div class="field"><label>내용</label><input id="eContent" value="${s.content}"></div>
+        <div class="field"><label>금액</label><input id="eAmount" type="number" value="${s.amount}"></div>
+      `;
+    } else if (type === 'memo') {
+      const m = memos.find(x => x.id === id);
+      fields.innerHTML = `
+        <div class="field"><label>날짜</label><input id="eDate" type="date" value="${m.date}"></div>
+        <div class="field"><label>메모</label><textarea id="eMemo">${m.memo}</textarea></div>
+      `;
+    }
+    document.getElementById("editModal").classList.add("show");
+  }
+
+  function closeModal() { document.getElementById("editModal").classList.remove("show"); }
+
+  async function saveEdit() {
+    showLoading(true);
+    try {
+      if (editType === 'schedule') {
+        await api('updateSchedule', { id: editId, date: document.getElementById("eDate").value, time: document.getElementById("eTime").value, title: document.getElementById("eTitle").value });
+        await loadSchedules();
+      } else if (editType === 'settlement') {
+        await api('updateSettlement', { id: editId, date: document.getElementById("eDate").value, content: document.getElementById("eContent").value, amount: document.getElementById("eAmount").value });
+        await loadSettlements();
+      } else if (editType === 'memo') {
+        await api('updateMemo', { id: editId, date: document.getElementById("eDate").value, memo: document.getElementById("eMemo").value });
+        await loadMemos();
+      }
+      closeModal();
+    } finally { showLoading(false); }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    await checkAuth();
+    const t = today();
+    ['scheduleDate', 'settlementDate', 'memoDate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = t;
+    });
+    loadHome();
+  });
+</script>
+</body>
+</html>
