@@ -3,153 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>우리 모임 관리보드</title>
+  <title>모임 대시보드</title>
   <style>
+    :root {
+      --bg: #f2f2f7;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-solid: #ffffff;
+      --primary: #007aff;
+      --primary-dark: #0056b3;
+      --text: #1c1c1e;
+      --text-sec: #8e8e93;
+      --border: rgba(60, 60, 67, 0.12);
+      --radius: 18px;
+    }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; background: #f3f4f6; color: #111827; }
-    button, input, textarea { font: inherit; }
-    button { border: 0; cursor: pointer; }
-    .app { min-height: 100vh; padding-bottom: 76px; }
-    .header { background: #ffffff; padding: 16px 18px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 20; }
-    .header-row { display: flex; align-items: center; justify-content: space-between; }
-    .title { font-size: 19px; font-weight: 800; }
-    .user-badge-group { display: flex; gap: 6px; }
-    .tag-btn { font-size: 12px; color: #4338ca; background: #eef2ff; padding: 5px 9px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .content { padding: 16px; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, textarea, select { font: inherit; outline: none; }
+    button { border: 0; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; }
+    button:active { transform: scale(0.97); opacity: 0.85; }
+
+    .app { max-width: 620px; margin: 0 auto; min-height: 100vh; padding-bottom: 90px; }
+
+    /* 애플 블러 상단바 */
+    .header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(242, 242, 247, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      padding: 14px 20px;
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .app-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .auth-badges { display: flex; gap: 8px; }
+    .pill-btn {
+      background: rgba(0, 122, 255, 0.1);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .pill-btn.pin { background: rgba(142, 142, 147, 0.15); color: #48484a; }
+
+    /* 세그먼트 컨트롤 탭 */
+    .segmented-control {
+      display: flex;
+      background: rgba(118, 118, 128, 0.12);
+      border-radius: 10px;
+      padding: 3px;
+    }
+    .seg-btn {
+      flex: 1; padding: 7px 0; border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-sec);
+      background: transparent;
+    }
+    .seg-btn.active {
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    /* 본문 */
+    .content { padding: 18px 20px; }
     .page { display: none; }
-    .page.active { display: block; }
-    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
-    .menu-card { background: white; border-radius: 16px; padding: 18px 12px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    .menu-card:active { transform: scale(0.97); }
-    .menu-icon { font-size: 26px; margin-bottom: 6px; }
-    .menu-title { font-weight: 800; font-size: 14px; }
-    .menu-desc { color: #6b7280; font-size: 11px; margin-top: 4px; }
-    .list { display: flex; flex-direction: column; gap: 10px; }
-    .item { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
-    .item-main { font-weight: 700; font-size: 15px; line-height: 1.45; }
-    .item-meta { color: #6b7280; font-size: 12px; margin-top: 7px; line-height: 1.5; }
-    .item-actions { display: flex; gap: 7px; margin-top: 11px; }
-    .small-btn { padding: 8px 12px; border-radius: 9px; background: #f3f4f6; color: #374151; font-size: 12px; font-weight: 700; }
-    .small-btn.delete { background: #fee2e2; color: #b91c1c; }
-    .primary-btn { width: 100%; padding: 13px; border-radius: 13px; background: #111827; color: white; font-weight: 800; margin-bottom: 12px; }
-    .secondary-btn { width: 100%; padding: 12px; border-radius: 13px; background: white; color: #111827; font-weight: 700; border: 1px solid #e5e7eb; }
-    .form { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; }
-    .form-title { font-size: 16px; font-weight: 800; margin-bottom: 13px; }
-    .field { margin-bottom: 11px; }
-    .field label { display: block; font-size: 12px; font-weight: 700; color: #4b5563; margin-bottom: 5px; }
-    .field input, .field textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; background: white; outline: none; }
-    .field textarea { min-height: 90px; resize: vertical; }
-    .empty { background: white; border-radius: 15px; padding: 30px 16px; text-align: center; color: #9ca3af; font-size: 13px; }
-    .calc-panel { background: #1e293b; color: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; }
-    .member-chip { display: inline-flex; align-items: center; gap: 6px; background: #334155; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #f8fafc; cursor: pointer; }
-    .member-chip input { width: 15px; height: 15px; accent-color: #38bdf8; }
-    .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; height: 64px; background: rgba(255,255,255,0.98); border-top: 1px solid #e5e7eb; display: grid; grid-template-columns: repeat(4, 1fr); z-index: 50; }
-    .nav-btn { background: transparent; color: #9ca3af; font-size: 11px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
-    .nav-btn.active { color: #111827; font-weight: 800; }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: flex-end; z-index: 80; }
+    .page.active { display: block; animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 카드 스타일 */
+    .ios-card {
+      background: var(--card-solid);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      border: 0.5px solid var(--border);
+    }
+    .card-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.3px; }
+
+    /* 폼 입력창 */
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-sec); margin-bottom: 6px; }
+    .ios-input {
+      width: 100%; padding: 12px 14px;
+      background: #f2f2f7; border: 0; border-radius: 12px;
+      font-size: 15px; color: var(--text);
+    }
+    .ios-input:focus { background: #e5e5ea; }
+    textarea.ios-input { min-height: 80px; resize: vertical; }
+
+    .btn-main {
+      width: 100%; padding: 13px;
+      background: var(--primary); color: white;
+      font-size: 15px; font-weight: 600; border-radius: 14px;
+      margin-top: 6px;
+    }
+
+    /* 리스트 아이템 */
+    .item-card {
+      background: var(--card-solid);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+      border: 0.5px solid var(--border);
+      position: relative;
+    }
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .item-title { font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--text); }
+    .item-amount { font-size: 16px; font-weight: 800; color: var(--primary); }
+    .item-body { font-size: 13px; color: var(--text-sec); margin-top: 6px; line-height: 1.5; white-space: pre-wrap; }
+    
+    /* 수정 이력 표시 태그 */
+    .edit-stamp {
+      font-size: 11px; color: #ff9500; background: rgba(255, 149, 0, 0.1);
+      padding: 2px 7px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600;
+    }
+
+    .item-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 12px; padding-top: 10px; border-top: 0.5px solid rgba(60,60,67,0.06);
+    }
+    .item-meta { font-size: 12px; color: var(--text-sec); }
+    .actions { display: flex; gap: 8px; }
+    .btn-action {
+      background: #f2f2f7; color: var(--text);
+      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    }
+    .btn-action.del { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+
+    /* 정산 전용 */
+    .calc-box {
+      background: linear-gradient(135deg, #1c1c1e, #2c2c2e);
+      color: white; border-radius: var(--radius); padding: 18px; margin-bottom: 16px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.12); padding: 5px 12px; border-radius: 16px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+    }
+    .chip input { accent-color: var(--primary); }
+
+    /* 모달 */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px); display: none; align-items: flex-end; z-index: 100;
+    }
     .modal.show { display: flex; }
-    .modal-box { background: white; width: 100%; max-height: 90vh; overflow-y: auto; border-radius: 22px 22px 0 0; padding: 20px; }
-    .loading { position: fixed; inset: 0; background: rgba(255,255,255,0.7); display: none; align-items: center; justify-content: center; z-index: 100; font-weight: 700; }
+    .modal-sheet {
+      background: white; width: 100%; max-height: 85vh;
+      border-radius: 24px 24px 0 0; padding: 22px 20px 40px; overflow-y: auto;
+    }
+
+    .loading {
+      position: fixed; inset: 0; background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200;
+      font-size: 14px; font-weight: 600; color: #48484a;
+    }
     .loading.show { display: flex; }
+    .empty { text-align: center; color: var(--text-sec); padding: 36px 0; font-size: 14px; }
   </style>
 </head>
 <body>
 
-<div id="loading" class="loading">처리 중...</div>
+<div id="loading" class="loading">동기화 중...</div>
 
 <div class="app">
   <header class="header">
-    <div class="header-row">
-      <div class="title">📋 모임 관리보드</div>
-      <div class="user-badge-group">
-        <div id="userBadge" class="tag-btn" onclick="changeUserName()">👤 이름</div>
-        <div class="tag-btn" onclick="changePin()" style="background:#fef3c7; color:#92400e;">🔒 PIN</div>
+    <div class="header-top">
+      <div class="app-title">우리 모임</div>
+      <div class="auth-badges">
+        <button id="userBadge" class="pill-btn" onclick="changeUserName()">👤 이름</button>
+        <button class="pill-btn pin" onclick="changePin()">🔒 PIN</button>
       </div>
+    </div>
+    <div class="segmented-control">
+      <button id="tab-schedule" class="seg-btn active" onclick="switchTab('schedule')">📅 일정</button>
+      <button id="tab-settlement" class="seg-btn" onclick="switchTab('settlement')">💰 정산</button>
+      <button id="tab-memo" class="seg-btn" onclick="switchTab('memo')">📝 메모</button>
     </div>
   </header>
 
   <main class="content">
-    <!-- 홈 -->
-    <section id="page-home" class="page active">
-      <div style="background:#111827; color:white; border-radius:18px; padding:18px;">
-        <div style="font-size:18px; font-weight:800; margin-bottom:4px;">대시보드</div>
-        <div style="font-size:12px; opacity:0.8;">일정·정산·메모를 한눈에 관리하세요.</div>
-      </div>
-      
-      <div class="card-grid">
-        <button class="menu-card" onclick="showPage('schedule')"><div class="menu-icon">📅</div><div class="menu-title">일정</div><div class="menu-desc">일정 관리</div></button>
-        <button class="menu-card" onclick="showPage('settlement')"><div class="menu-icon">💰</div><div class="menu-title">정산</div><div class="menu-desc">N빵 계산</div></button>
-        <button class="menu-card" onclick="showPage('memo')"><div class="menu-icon">📝</div><div class="menu-title">메모</div><div class="menu-desc">공유 메모</div></button>
-      </div>
-
-      <div style="font-weight:800; margin:22px 0 10px;">오늘의 일정</div>
-      <div id="homeSchedules"></div>
-    </section>
-
-    <!-- 일정 -->
-    <section id="page-schedule" class="page">
-      <div class="form">
-        <div class="form-title">일정 추가</div>
-        <div class="field"><label>날짜</label><input id="scheduleDate" type="date"></div>
-        <div class="field"><label>시간</label><input id="scheduleTime" type="time"></div>
-        <div class="field"><label>내용</label><input id="scheduleTitle" placeholder="일정 입력"></div>
-        <button class="primary-btn" onclick="addSchedule()">등록</button>
-      </div>
-      <div style="font-weight:800; margin-bottom:10px;">일정 목록</div>
-      <div id="scheduleList" class="list"></div>
-    </section>
-
-    <!-- 정산 -->
-    <section id="page-settlement" class="page">
-      <div class="calc-panel">
-        <div style="font-weight:800; margin-bottom:8px;">💡 스마트 N빵 계산기</div>
-        <div style="font-size:12px; color:#cbd5e1; margin-bottom:6px;">참여 인원 선택</div>
-        <div id="memberCheckboxContainer" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;"></div>
-        <div style="display:flex; justify-content:space-between;">
-          <button class="small-btn" onclick="toggleSelectAllSettlements()" style="background:#334155; color:white;">전체선택/해제</button>
-          <button class="small-btn" onclick="runSettlementCalc()" style="background:#38bdf8; color:#0f172a; font-weight:800;">송금 계산</button>
+    <!-- 일정 탭 -->
+    <section id="page-schedule" class="page active">
+      <div class="ios-card">
+        <div class="card-title">새 일정 등록</div>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+          <input id="scheduleDate" type="date" class="ios-input" style="flex:1;">
+          <input id="scheduleTime" type="time" class="ios-input" style="flex:1;">
         </div>
-        <div id="calcResultBox" style="margin-top:12px; display:none; border-top:1px solid #334155; padding-top:10px;"></div>
+        <input id="scheduleTitle" placeholder="일정 내용을 입력하세요" class="ios-input" style="margin-bottom:10px;">
+        <button class="btn-main" onclick="addSchedule()">일정 추가</button>
       </div>
-      <div class="form">
-        <div class="form-title">새 지출 등록</div>
-        <div class="field"><label>날짜</label><input id="settlementDate" type="date"></div>
-        <div class="field"><label>내용</label><input id="settlementContent" placeholder="예: 회식 1차"></div>
-        <div class="field"><label>금액</label><input id="settlementAmount" type="number" placeholder="예: 50000"></div>
-        <div class="field"><label>비고</label><input id="settlementNote" placeholder="선택사항"></div>
-        <button class="primary-btn" onclick="addSettlement()">지출 등록</button>
-      </div>
-      <div style="font-weight:800; margin-bottom:10px;">지출 내역</div>
-      <div id="settlementList" class="list"></div>
+      <div id="scheduleList"></div>
     </section>
 
-    <!-- 메모 -->
-    <section id="page-memo" class="page">
-      <div class="form">
-        <div class="form-title">메모 작성</div>
-        <div class="field"><label>날짜</label><input id="memoDate" type="date"></div>
-        <div class="field"><label>메모</label><textarea id="memoText" placeholder="내용을 입력하세요"></textarea></div>
-        <button class="primary-btn" onclick="addMemo()">메모 등록</button>
+    <!-- 정산 탭 -->
+    <section id="page-settlement" class="page">
+      <div class="calc-box">
+        <div style="font-size:16px; font-weight:700; margin-bottom:10px;">💡 스마트 N빵 정산</div>
+        <div style="font-size:12px; opacity:0.8; margin-bottom:8px;">참여 인원 선택</div>
+        <div id="memberCheckboxContainer" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;"></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-action" onclick="toggleSelectAllSettlements()" style="background:rgba(255,255,255,0.15); color:white;">전체선택</button>
+          <button class="btn-action" onclick="runSettlementCalc()" style="background:var(--primary); color:white; font-weight:700; flex:1;">송금 계산하기</button>
+        </div>
+        <div id="calcResultBox" style="margin-top:14px; display:none; border-top:0.5px solid rgba(255,255,255,0.15); padding-top:12px;"></div>
       </div>
-      <div style="font-weight:800; margin-bottom:10px;">메모 목록</div>
-      <div id="memoList" class="list"></div>
+
+      <div class="ios-card">
+        <div class="card-title">새 지출 등록</div>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+          <input id="settlementDate" type="date" class="ios-input" style="flex:1;">
+          <input id="settlementPayer" placeholder="결제자(기본: 나)" class="ios-input" style="flex:1;">
+        </div>
+        <input id="settlementContent" placeholder="지출 내용 (예: 1차 고깃집)" class="ios-input" style="margin-bottom:10px;">
+        <input id="settlementAmount" type="number" placeholder="결제 금액 (원)" class="ios-input" style="margin-bottom:10px;">
+        <input id="settlementNote" placeholder="비고 (선택사항)" class="ios-input" style="margin-bottom:10px;">
+        <button class="btn-main" onclick="addSettlement()">지출 저장</button>
+      </div>
+      <div id="settlementList"></div>
+    </section>
+
+    <!-- 메모 탭 -->
+    <section id="page-memo" class="page">
+      <div class="ios-card">
+        <div class="card-title">공유 메모 작성</div>
+        <input id="memoDate" type="date" class="ios-input" style="margin-bottom:10px;">
+        <textarea id="memoText" placeholder="공유할 메모나 전달사항을 적어주세요" class="ios-input" style="margin-bottom:10px;"></textarea>
+        <button class="btn-main" onclick="addMemo()">메모 등록</button>
+      </div>
+      <div id="memoList"></div>
     </section>
   </main>
-
-  <nav class="bottom-nav">
-    <button id="nav-home" class="nav-btn active" onclick="showPage('home')">🏠홈</button>
-    <button id="nav-schedule" class="nav-btn" onclick="showPage('schedule')">📅일정</button>
-    <button id="nav-settlement" class="nav-btn" onclick="showPage('settlement')">💰정산</button>
-    <button id="nav-memo" class="nav-btn" onclick="showPage('memo')">📝메모</button>
-  </nav>
 </div>
 
-<!-- 수정 모달 -->
+<!-- 수정 모달 (iOS Bottom Sheet) -->
 <div id="editModal" class="modal">
-  <div class="modal-box">
+  <div class="modal-sheet">
+    <div style="font-size:18px; font-weight:700; margin-bottom:16px;">내역 수정</div>
     <div id="modalFields"></div>
-    <button class="primary-btn" onclick="saveEdit()">저장</button>
-    <button class="secondary-btn" onclick="closeModal()">취소</button>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button class="btn-main" onclick="saveEdit()" style="flex:2;">수정 완료</button>
+      <button class="btn-action" onclick="closeModal()" style="flex:1; padding:13px; border-radius:14px;">취소</button>
+    </div>
   </div>
 </div>
 
@@ -177,18 +281,18 @@
             localStorage.setItem('app_pin', appPin);
             break;
           } else {
-            alert("비밀번호가 맞지 않습니다.");
+            alert("비밀번호가 일치하지 않습니다.");
             appPin = '';
           }
         } catch(e) {
-          alert("서버 연결 실패. 다시 시도해주세요.");
+          alert("서버 연결 실패.");
           appPin = '';
         }
       }
     }
 
     if (!userName) {
-      userName = prompt("본인 이름을 입력해주세요 (등록자로 사용됩니다):", "S K");
+      userName = prompt("본인 이름을 입력해주세요 (수정/등록 이력에 사용됩니다):", "S K");
       if (!userName || !userName.trim()) userName = "익명";
       userName = userName.trim();
       localStorage.setItem('app_username', userName);
@@ -206,7 +310,7 @@
   }
 
   function changePin() {
-    const newPin = prompt("새로 등록할 PIN 번호를 입력하세요:", "");
+    const newPin = prompt("새 PIN 번호를 입력하세요:", "");
     if (newPin && newPin.trim()) {
       localStorage.setItem('app_pin', newPin.trim());
       location.reload();
@@ -216,7 +320,7 @@
   async function api(action, payload = {}) {
     payload.action = action;
     payload.pin = appPin;
-    payload.user = payload.user || userName;
+    payload.user = userName;
 
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -227,7 +331,7 @@
     if (!data.ok) {
       if (res.status === 401) {
         localStorage.removeItem('app_pin');
-        alert("비밀번호가 올바르지 않습니다. 다시 입력해주세요.");
+        alert("비밀번호가 맞지 않습니다.");
         location.reload();
       }
       throw new Error(data.error || '오류가 발생했습니다.');
@@ -238,31 +342,15 @@
   function showLoading(show) { document.getElementById("loading").classList.toggle("show", show); }
   function today() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0'); }
 
-  function showPage(page) {
+  function switchTab(tab) {
     document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
-    document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
-    const p = document.getElementById("page-" + page);
-    const n = document.getElementById("nav-" + page);
-    if (p) p.classList.add("active");
-    if (n) n.classList.add("active");
+    document.querySelectorAll(".seg-btn").forEach(el => el.classList.remove("active"));
+    document.getElementById("page-" + tab).classList.add("active");
+    document.getElementById("tab-" + tab).classList.add("active");
 
-    if (page === 'home') loadHome();
-    if (page === 'schedule') loadSchedules();
-    if (page === 'settlement') loadSettlements();
-    if (page === 'memo') loadMemos();
-  }
-
-  /* 홈 */
-  async function loadHome() {
-    try {
-      const res = await api('getSchedules');
-      schedules = res.data || [];
-      const t = today();
-      const todayList = schedules.filter(s => s.date === t);
-      const box = document.getElementById("homeSchedules");
-      if (!todayList.length) box.innerHTML = '<div class="empty">오늘 예정된 일정이 없습니다.</div>';
-      else box.innerHTML = todayList.map(s => `<div class="item"><b>${s.time || ''} ${s.title}</b> (${s.user})</div>`).join('');
-    } catch(e) {}
+    if (tab === 'schedule') loadSchedules();
+    if (tab === 'settlement') loadSettlements();
+    if (tab === 'memo') loadMemos();
   }
 
   /* 일정 */
@@ -270,14 +358,20 @@
     const res = await api('getSchedules');
     schedules = res.data || [];
     const box = document.getElementById("scheduleList");
-    if (!schedules.length) box.innerHTML = '<div class="empty">등록된 일정이 없습니다.</div>';
-    else box.innerHTML = schedules.map(s => `
-      <div class="item">
-        <div class="item-main">📅 ${s.date} ${s.time ? '· '+s.time : ''}<br>${s.title}</div>
-        <div class="item-meta">등록자: ${s.user}</div>
-        <div class="item-actions">
-          <button class="small-btn" onclick="openEdit('schedule', ${s.id})">수정</button>
-          <button class="small-btn delete" onclick="deleteSchedule(${s.id})">삭제</button>
+    if (!schedules.length) { box.innerHTML = '<div class="empty">등록된 일정이 없습니다.</div>'; return; }
+    box.innerHTML = schedules.map(s => `
+      <div class="item-card">
+        <div class="item-header">
+          <div class="item-title">📅 ${s.title}</div>
+          <div style="font-size:13px; font-weight:700; color:var(--text-sec);">${s.date} ${s.time || ''}</div>
+        </div>
+        ${s.updated_by ? `<div class="edit-stamp">최종 수정: ${s.updated_by} (${s.updated_at ? s.updated_at.slice(5,16) : ''})</div>` : ''}
+        <div class="item-footer">
+          <div class="item-meta">작성: ${s.user}</div>
+          <div class="actions">
+            <button class="btn-action" onclick="openEdit('schedule', ${s.id})">수정</button>
+            <button class="btn-action del" onclick="deleteSchedule(${s.id})">삭제</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -297,7 +391,7 @@
   }
 
   async function deleteSchedule(id) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("이 일정을 삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
   }
@@ -310,23 +404,28 @@
 
     const memberContainer = document.getElementById("memberCheckboxContainer");
     memberContainer.innerHTML = chatMembers.map(m => `
-      <label class="member-chip"><input type="checkbox" class="calc-m" value="${m}" checked>${m}</label>
+      <label class="chip"><input type="checkbox" class="calc-m" value="${m}" checked>${m}</label>
     `).join('');
 
     const box = document.getElementById("settlementList");
-    if (!settlements.length) box.innerHTML = '<div class="empty">지출 내역이 없습니다.</div>';
-    else box.innerHTML = settlements.map(s => `
-      <div class="item">
-        <div style="display:flex; gap:10px;">
-          <input type="checkbox" class="calc-s" value="${s.id}" checked style="width:20px;">
-          <div style="flex:1;">
-            <div class="item-main">💰 ${s.content}</div>
-            <div class="item-meta">${s.date} · <b>${Number(s.amount).toLocaleString()}원</b> (결제: ${s.user})</div>
+    if (!settlements.length) { box.innerHTML = '<div class="empty">지출 내역이 없습니다.</div>'; return; }
+    box.innerHTML = settlements.map(s => `
+      <div class="item-card">
+        <div class="item-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" class="calc-s" value="${s.id}" checked style="width:18px; height:18px; accent-color:var(--primary);">
+            <div class="item-title">${s.content}</div>
           </div>
+          <div class="item-amount">${Number(s.amount).toLocaleString()}원</div>
         </div>
-        <div class="item-actions" style="margin-left:30px;">
-          <button class="small-btn" onclick="openEdit('settlement', ${s.id})">수정</button>
-          <button class="small-btn delete" onclick="deleteSettlement(${s.id})">삭제</button>
+        <div class="item-body">${s.date} · 결제자: <b>${s.user}</b>${s.note ? ' (' + s.note + ')' : ''}</div>
+        ${s.updated_by ? `<div class="edit-stamp">최종 수정: ${s.updated_by} (${s.updated_at ? s.updated_at.slice(5,16) : ''})</div>` : ''}
+        <div class="item-footer">
+          <div class="item-meta">등록자: ${s.user}</div>
+          <div class="actions">
+            <button class="btn-action" onclick="openEdit('settlement', ${s.id})">수정</button>
+            <button class="btn-action del" onclick="deleteSettlement(${s.id})">삭제</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -334,21 +433,23 @@
 
   async function addSettlement() {
     const date = document.getElementById("settlementDate").value;
+    const payer = document.getElementById("settlementPayer").value.trim();
     const content = document.getElementById("settlementContent").value.trim();
     const amount = document.getElementById("settlementAmount").value;
     const note = document.getElementById("settlementNote").value.trim();
-    if (!date || !content || !amount) return alert("필수 항목을 입력하세요.");
+    if (!date || !content || !amount) return alert("필수 항목을 모두 입력하세요.");
     showLoading(true);
     try {
-      await api('addSettlement', { date, content, amount, note });
+      await api('addSettlement', { date, payer, content, amount, note });
       document.getElementById("settlementContent").value = '';
       document.getElementById("settlementAmount").value = '';
+      document.getElementById("settlementNote").value = '';
       await loadSettlements();
     } finally { showLoading(false); }
   }
 
   async function deleteSettlement(id) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("이 지출 내역을 삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteSettlement', { id }); await loadSettlements(); } finally { showLoading(false); }
   }
@@ -362,15 +463,15 @@
   async function runSettlementCalc() {
     const sIds = Array.from(document.querySelectorAll(".calc-s:checked")).map(c => c.value).join(',');
     const mems = Array.from(document.querySelectorAll(".calc-m:checked")).map(c => c.value).join(',');
-    if (!sIds || !mems) return alert("지출 항목과 인원을 1개 이상 선택하세요.");
+    if (!sIds || !mems) return alert("지출 내역과 참여 인원을 선택하세요.");
     showLoading(true);
     try {
       const res = await api('calculateSettlement', { selectedIds: sIds, participants: mems });
       const box = document.getElementById("calcResultBox");
       box.style.display = 'block';
-      let html = `<div style="font-size:13px; line-height:1.6;">총 <b>${res.totalAmount.toLocaleString()}원</b> / ${res.memberCount}명 (1인당 <b>${res.perPerson.toLocaleString()}원</b>)<br><br>`;
+      let html = `<div style="font-size:13px; line-height:1.7;">총 <b>${res.totalAmount.toLocaleString()}원</b> / ${res.memberCount}명 (1인당 <b>${res.perPerson.toLocaleString()}원</b>)<br><br>`;
       if (res.transfers.length) {
-        html += '<b>👉 송금 안내:</b><br>' + res.transfers.map(t => `• ${t.from} ➡️ ${t.to}: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
+        html += '<b style="color:#64d2ff;">👉 송금 안내:</b><br>' + res.transfers.map(t => `• ${t.from} ➡️ <b>${t.to}</b>: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
       } else html += '추가 정산이 필요 없습니다.';
       html += '</div>';
       box.innerHTML = html;
@@ -382,14 +483,17 @@
     const res = await api('getMemos');
     memos = res.data || [];
     const box = document.getElementById("memoList");
-    if (!memos.length) box.innerHTML = '<div class="empty">메모가 없습니다.</div>';
-    else box.innerHTML = memos.map(m => `
-      <div class="item">
-        <div class="item-main" style="white-space:pre-wrap;">📝 ${m.memo}</div>
-        <div class="item-meta">${m.date} · 작성자: ${m.user}</div>
-        <div class="item-actions">
-          <button class="small-btn" onclick="openEdit('memo', ${m.id})">수정</button>
-          <button class="small-btn delete" onclick="deleteMemo(${m.id})">삭제</button>
+    if (!memos.length) { box.innerHTML = '<div class="empty">작성된 메모가 없습니다.</div>'; return; }
+    box.innerHTML = memos.map(m => `
+      <div class="item-card">
+        <div class="item-title" style="white-space:pre-wrap;">${m.memo}</div>
+        ${m.updated_by ? `<div class="edit-stamp">최종 수정: ${m.updated_by} (${m.updated_at ? m.updated_at.slice(5,16) : ''})</div>` : ''}
+        <div class="item-footer">
+          <div class="item-meta">${m.date} · 작성: ${m.user}</div>
+          <div class="actions">
+            <button class="btn-action" onclick="openEdit('memo', ${m.id})">수정</button>
+            <button class="btn-action del" onclick="deleteMemo(${m.id})">삭제</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -398,7 +502,7 @@
   async function addMemo() {
     const date = document.getElementById("memoDate").value;
     const memo = document.getElementById("memoText").value.trim();
-    if (!date || !memo) return alert("내용을 입력하세요.");
+    if (!date || !memo) return alert("메모 내용을 입력하세요.");
     showLoading(true);
     try {
       await api('addMemo', { date, memo });
@@ -408,7 +512,7 @@
   }
 
   async function deleteMemo(id) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("이 메모를 삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteMemo', { id }); await loadMemos(); } finally { showLoading(false); }
   }
@@ -420,22 +524,24 @@
     if (type === 'schedule') {
       const s = schedules.find(x => x.id === id);
       fields.innerHTML = `
-        <div class="field"><label>날짜</label><input id="eDate" type="date" value="${s.date}"></div>
-        <div class="field"><label>시간</label><input id="eTime" type="time" value="${s.time}"></div>
-        <div class="field"><label>내용</label><input id="eTitle" value="${s.title}"></div>
+        <div class="form-group"><label class="form-label">날짜</label><input id="eDate" type="date" class="ios-input" value="${s.date}"></div>
+        <div class="form-group"><label class="form-label">시간</label><input id="eTime" type="time" class="ios-input" value="${s.time}"></div>
+        <div class="form-group"><label class="form-label">내용</label><input id="eTitle" class="ios-input" value="${s.title}"></div>
       `;
     } else if (type === 'settlement') {
       const s = settlements.find(x => x.id === id);
       fields.innerHTML = `
-        <div class="field"><label>날짜</label><input id="eDate" type="date" value="${s.date}"></div>
-        <div class="field"><label>내용</label><input id="eContent" value="${s.content}"></div>
-        <div class="field"><label>금액</label><input id="eAmount" type="number" value="${s.amount}"></div>
+        <div class="form-group"><label class="form-label">날짜</label><input id="eDate" type="date" class="ios-input" value="${s.date}"></div>
+        <div class="form-group"><label class="form-label">결제자</label><input id="ePayer" class="ios-input" value="${s.user}"></div>
+        <div class="form-group"><label class="form-label">내용</label><input id="eContent" class="ios-input" value="${s.content}"></div>
+        <div class="form-group"><label class="form-label">금액</label><input id="eAmount" type="number" class="ios-input" value="${s.amount}"></div>
+        <div class="form-group"><label class="form-label">비고</label><input id="eNote" class="ios-input" value="${s.note || ''}"></div>
       `;
     } else if (type === 'memo') {
       const m = memos.find(x => x.id === id);
       fields.innerHTML = `
-        <div class="field"><label>날짜</label><input id="eDate" type="date" value="${m.date}"></div>
-        <div class="field"><label>메모</label><textarea id="eMemo">${m.memo}</textarea></div>
+        <div class="form-group"><label class="form-label">날짜</label><input id="eDate" type="date" class="ios-input" value="${m.date}"></div>
+        <div class="form-group"><label class="form-label">메모 내용</label><textarea id="eMemo" class="ios-input">${m.memo}</textarea></div>
       `;
     }
     document.getElementById("editModal").classList.add("show");
@@ -450,7 +556,7 @@
         await api('updateSchedule', { id: editId, date: document.getElementById("eDate").value, time: document.getElementById("eTime").value, title: document.getElementById("eTitle").value });
         await loadSchedules();
       } else if (editType === 'settlement') {
-        await api('updateSettlement', { id: editId, date: document.getElementById("eDate").value, content: document.getElementById("eContent").value, amount: document.getElementById("eAmount").value });
+        await api('updateSettlement', { id: editId, date: document.getElementById("eDate").value, payer: document.getElementById("ePayer").value, content: document.getElementById("eContent").value, amount: document.getElementById("eAmount").value, note: document.getElementById("eNote").value });
         await loadSettlements();
       } else if (editType === 'memo') {
         await api('updateMemo', { id: editId, date: document.getElementById("eDate").value, memo: document.getElementById("eMemo").value });
@@ -467,7 +573,7 @@
       const el = document.getElementById(id);
       if (el) el.value = t;
     });
-    loadHome();
+    switchTab('schedule');
   });
 </script>
 </body>
