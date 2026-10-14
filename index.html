@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>우리 모임 관리보드</title>
+  <title>경제연구소</title>
   <style>
     :root {
       --bg: #f2f2f7;
@@ -12,7 +12,7 @@
       --text: #1c1c1e;
       --text-sub: #8e8e93;
       --border: rgba(60, 60, 67, 0.1);
-      --radius: 14px;
+      --radius: 16px;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
@@ -30,7 +30,7 @@
 
     .app { max-width: 580px; margin: 0 auto; min-height: 100vh; padding-bottom: 50px; }
 
-    /* 애플 블러 상단 네비게이션 */
+    /* 애플 블러 상단바 */
     .header {
       position: sticky; top: 0; z-index: 50;
       background: rgba(242, 242, 247, 0.85);
@@ -40,11 +40,11 @@
       padding: 12px 16px;
     }
     .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .header-title { font-size: 19px; font-weight: 700; letter-spacing: -0.4px; }
+    .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
     .header-actions { display: flex; gap: 6px; }
     
     .badge-btn {
-      font-size: 13px; font-weight: 600; padding: 5px 10px;
+      font-size: 13px; font-weight: 600; padding: 5px 11px;
       border-radius: 16px; background: rgba(0, 122, 255, 0.1); color: var(--primary);
     }
     .badge-btn.pin { background: rgba(142, 142, 147, 0.15); color: #48484a; }
@@ -68,6 +68,23 @@
     .content { padding: 14px 16px; }
     .page { display: none; }
     .page.active { display: block; }
+
+    /* 상단 비주얼 배너 카드 */
+    .hero-banner {
+      width: 100%;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      border: 0.5px solid var(--border);
+      background: var(--card);
+    }
+    .hero-banner img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
 
     /* 카드 */
     .card {
@@ -166,7 +183,7 @@
 <div class="app">
   <header class="header">
     <div class="header-top">
-      <div class="header-title">우리 모임</div>
+      <div class="header-title">🏛️ 경제연구소</div>
       <div class="header-actions">
         <button id="userBadge" class="badge-btn" onclick="changeUserName()">👤 이름</button>
         <button class="badge-btn pin" onclick="changePin()">🔒 PIN</button>
@@ -180,6 +197,11 @@
   </header>
 
   <main class="content">
+    <!-- 상단 대표 비주얼 일러스트 배너 -->
+    <div class="hero-banner">
+      <img src="banner.png" alt="경제연구소 글로벌 경제 전략 세미나" onerror="this.parentElement.style.display='none';">
+    </div>
+
     <!-- 일정 탭 -->
     <section id="page-schedule" class="page active">
       <div class="card">
@@ -256,7 +278,7 @@
 
   async function checkAuth() {
     while (!appPin) {
-      const input = prompt("🔒 모임 비밀번호(PIN)를 입력하세요:", "");
+      const input = prompt("🔒 비밀번호(PIN)를 입력하세요:", "");
       if (input && input.trim()) {
         appPin = input.trim();
         try {
@@ -380,7 +402,7 @@
   }
 
   async function deleteSchedule(id) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("이 일정을 삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
   }
@@ -438,7 +460,7 @@
   }
 
   async function deleteSettlement(id) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("이 지출 내역을 삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteSettlement', { id }); await loadSettlements(); } finally { showLoading(false); }
   }
@@ -501,7 +523,7 @@
   }
 
   async function deleteMemo(id) {
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("이 메모를 삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteMemo', { id }); await loadMemos(); } finally { showLoading(false); }
   }
