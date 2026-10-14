@@ -31,7 +31,7 @@
     .app { max-width: 580px; margin: 0 auto; min-height: 100vh; padding-bottom: 50px; display: none; }
     .app.ready { display: block; }
 
-    /* 잠금 화면 (외부인 차단용) */
+    /* 잠금 화면 */
     .lock-screen {
       position: fixed; inset: 0; background: var(--bg);
       display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -44,7 +44,7 @@
       border: 0.5px solid var(--border);
     }
 
-    /* 최초 1회 프로필 생성 모달 */
+    /* 프로필 설정 화면 */
     .profile-screen {
       position: fixed; inset: 0; background: rgba(0,0,0,0.4);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -57,17 +57,6 @@
       max-width: 380px; width: 100%; text-align: center;
       box-shadow: 0 12px 36px rgba(0,0,0,0.15);
     }
-    .avatar-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-      margin: 16px 0;
-    }
-    .avatar-option {
-      font-size: 26px; padding: 10px 0; border-radius: 14px;
-      background: #f2f2f7; border: 2px solid transparent; cursor: pointer;
-    }
-    .avatar-option.selected {
-      border-color: var(--primary); background: rgba(0, 122, 255, 0.08);
-    }
     .existing-members {
       display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px;
     }
@@ -76,7 +65,7 @@
       background: #f2f2f7; color: var(--text-sub); font-weight: 600; cursor: pointer;
     }
 
-    /* 애플 블러 상단바 */
+    /* 상단 네비게이션 */
     .header {
       position: sticky; top: 0; z-index: 50;
       background: rgba(242, 242, 247, 0.85);
@@ -87,13 +76,15 @@
     }
     .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+    .header-actions { display: flex; gap: 6px; }
     
     .badge-btn {
       font-size: 13px; font-weight: 600; padding: 6px 12px;
       border-radius: 16px; background: rgba(0, 122, 255, 0.1); color: var(--primary);
     }
+    .badge-btn.admin { background: rgba(255, 149, 0, 0.12); color: #ff9500; }
 
-    /* 애플 세그먼트 컨트롤 탭 */
+    /* 세그먼트 탭 */
     .segmented-tabs {
       display: flex; background: rgba(118, 118, 128, 0.12);
       border-radius: 9px; padding: 2px;
@@ -113,24 +104,33 @@
     .page { display: none; }
     .page.active { display: block; }
 
-    /* 상단 비주얼 배너 카드 */
+    /* 홈 화면 전용 구성 */
     .hero-banner {
-      width: 100%;
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 14px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-      border: 0.5px solid var(--border);
-      background: var(--card);
+      width: 100%; border-radius: var(--radius); overflow: hidden;
+      margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      border: 0.5px solid var(--border); background: var(--card);
     }
-    .hero-banner img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
-    }
+    .hero-banner img { width: 100%; height: auto; display: block; object-fit: cover; }
 
-    /* 카드 */
+    .notice-card {
+      background: var(--card); border-radius: var(--radius); padding: 16px;
+      margin-bottom: 12px; border: 0.5px solid var(--border);
+    }
+    .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .notice-title { font-size: 13px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+    .notice-content { font-size: 14px; color: var(--text); white-space: pre-wrap; line-height: 1.5; }
+
+    .quick-links {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;
+    }
+    .quick-link-card {
+      background: var(--card); border-radius: var(--radius); padding: 16px 12px;
+      text-align: center; border: 0.5px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02); cursor: pointer;
+    }
+    .quick-link-title { font-size: 15px; font-weight: 700; margin-top: 4px; }
+
+    /* 카드 공통 */
     .card {
       background: var(--card); border-radius: var(--radius);
       padding: 16px; margin-bottom: 12px;
@@ -139,7 +139,6 @@
     }
     .card-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 
-    /* 통일된 폼 입력창 */
     .field-row { display: flex; gap: 8px; margin-bottom: 8px; }
     .input {
       width: 100%; padding: 11px 13px; border: 0;
@@ -167,7 +166,6 @@
     .item-amount { font-size: 15px; font-weight: 700; color: var(--primary); }
     .item-sub { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
 
-    /* 수정 이력 표시 라벨 */
     .edit-label {
       font-size: 11px; font-weight: 600; color: #ff9500;
       background: rgba(255, 149, 0, 0.1); padding: 2px 6px;
@@ -207,7 +205,7 @@
     .modal.show { display: flex; }
     .sheet {
       background: var(--card); width: 100%; border-radius: 20px 20px 0 0;
-      padding: 20px 18px 34px; max-height: 80vh; overflow-y: auto;
+      padding: 20px 18px 34px; max-height: 85vh; overflow-y: auto;
     }
     .sheet-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
 
@@ -224,69 +222,90 @@
 
 <div id="loading" class="loading">동기화 중...</div>
 
-<!-- 1. 외부인 차단 화면 (시크릿 링크 없이 접속 시) -->
+<!-- 잠금 화면 -->
 <div id="lockScreen" class="lock-screen">
   <div class="lock-card">
-    <div style="font-size: 42px; margin-bottom: 12px;">🔒</div>
-    <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">멤버 전용 공간입니다</div>
+    <div style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">멤버 전용 공간입니다</div>
     <div style="font-size: 13px; color: var(--text-sub); line-height: 1.6;">
       채팅방 공지에 등록된<br><b>전용 초대 링크</b>를 통해 접속해 주세요.
     </div>
   </div>
 </div>
 
-<!-- 2. 최초 1회 프로필 설정 모달 -->
+<!-- 프로필 설정 화면 -->
 <div id="profileScreen" class="profile-screen">
   <div class="profile-card">
     <div style="font-size: 19px; font-weight: 700; margin-bottom: 6px;">프로필 설정</div>
-    <div style="font-size: 13px; color: var(--text-sub);">처음 한 번만 설정하면 이후 자동으로 로그인됩니다.</div>
-    
-    <div class="avatar-grid" id="avatarGrid">
-      <div class="avatar-option selected" onclick="selectAvatar('🐶', this)">🐶</div>
-      <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
-      <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
-      <div class="avatar-option" onclick="selectAvatar('🐻', this)">🐻</div>
-      <div class="avatar-option" onclick="selectAvatar('🐼', this)">🐼</div>
-      <div class="avatar-option" onclick="selectAvatar('🐯', this)">🐯</div>
-      <div class="avatar-option" onclick="selectAvatar('😎', this)">😎</div>
-      <div class="avatar-option" onclick="selectAvatar('👑', this)">👑</div>
-    </div>
-
-    <input id="profileNameInput" class="input" placeholder="사용할 이름 또는 닉네임 입력" style="text-align:center; font-weight:600; margin-bottom:8px;">
+    <div style="font-size: 13px; color: var(--text-sub); margin-bottom: 14px;">사용하실 이름을 입력해주세요.</div>
+    <input id="profileNameInput" class="input" placeholder="이름 입력 (예: S K)" style="text-align:center; font-weight:600; margin-bottom:8px;">
     <div id="existingMemberBox" class="existing-members"></div>
-
     <button class="btn-main" onclick="saveProfile()" style="margin-top:14px;">시작하기</button>
   </div>
 </div>
 
-<!-- 3. 메인 앱 화면 -->
+<!-- 메인 앱 화면 -->
 <div id="mainApp" class="app">
   <header class="header">
     <div class="header-top">
-      <div class="header-title">🏛️ 경제연구소</div>
-      <button id="userBadge" class="badge-btn" onclick="openProfileSetup()">👤 프로필</button>
+      <div class="header-title">경제연구소</div>
+      <div class="header-actions">
+        <button id="adminBtn" class="badge-btn admin" onclick="openAdminModal()" style="display:none;">관리</button>
+        <button id="userBadge" class="badge-btn" onclick="openProfileSetup()">프로필</button>
+      </div>
     </div>
     <div class="segmented-tabs">
-      <button id="tab-schedule" class="tab-btn active" onclick="switchTab('schedule')">📅 일정</button>
-      <button id="tab-settlement" class="tab-btn" onclick="switchTab('settlement')">💰 정산</button>
-      <button id="tab-memo" class="tab-btn" onclick="switchTab('memo')">📝 메모</button>
+      <button id="tab-home" class="tab-btn active" onclick="switchTab('home')">홈</button>
+      <button id="tab-schedule" class="tab-btn" onclick="switchTab('schedule')">일정</button>
+      <button id="tab-settlement" class="tab-btn" onclick="switchTab('settlement')">정산</button>
+      <button id="tab-memo" class="tab-btn" onclick="switchTab('memo')">메모</button>
     </div>
   </header>
 
   <main class="content">
-    <div class="hero-banner">
-      <img src="banner.png" alt="경제연구소 글로벌 경제 전략 세미나" onerror="this.parentElement.style.display='none';">
-    </div>
+    <!-- 홈 탭 -->
+    <section id="page-home" class="page active">
+      <div class="hero-banner">
+        <img src="banner.png" alt="경제연구소 세미나" onerror="this.parentElement.style.display='none';">
+      </div>
+
+      <div class="notice-card">
+        <div class="notice-header">
+          <div class="notice-title">공지사항</div>
+          <button id="editNoticeBtn" class="btn-mini" onclick="openEditNotice()" style="display:none;">편집</button>
+        </div>
+        <div id="homeNoticeText" class="notice-content">등록된 공지가 없습니다.</div>
+      </div>
+
+      <div class="quick-links">
+        <div class="quick-link-card" onclick="switchTab('schedule')">
+          <div style="font-size:18px;">📅</div>
+          <div class="quick-link-title">일정</div>
+        </div>
+        <div class="quick-link-card" onclick="switchTab('settlement')">
+          <div style="font-size:18px;">💰</div>
+          <div class="quick-link-title">정산</div>
+        </div>
+        <div class="quick-link-card" onclick="switchTab('memo')">
+          <div style="font-size:18px;">📝</div>
+          <div class="quick-link-title">메모</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">다가올 일정</div>
+        <div id="homeUpcomingSchedules"></div>
+      </div>
+    </section>
 
     <!-- 일정 탭 -->
-    <section id="page-schedule" class="page active">
+    <section id="page-schedule" class="page">
       <div class="card">
-        <div class="card-title">새 일정</div>
+        <div class="card-title">새 일정 등록</div>
         <div class="field-row">
           <input id="scheduleDate" type="date" class="input" style="flex:1;">
           <input id="scheduleTime" type="time" class="input" style="flex:1;">
         </div>
-        <input id="scheduleTitle" placeholder="일정 내용을 입력하세요" class="input" style="margin-bottom:8px;">
+        <input id="scheduleTitle" placeholder="일정 내용" class="input" style="margin-bottom:8px;">
         <button class="btn-main" onclick="addSchedule()">등록</button>
       </div>
       <div id="scheduleList"></div>
@@ -295,7 +314,7 @@
     <!-- 정산 탭 -->
     <section id="page-settlement" class="page">
       <div class="calc-container">
-        <div style="font-size:15px; font-weight:700; margin-bottom:8px;">💡 N빵 계산기</div>
+        <div style="font-size:15px; font-weight:700; margin-bottom:8px;">N빵 계산기</div>
         <div style="font-size:12px; opacity:0.8; margin-bottom:8px;">참여 인원 선택</div>
         <div id="memberCheckboxContainer" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;"></div>
         <div style="display:flex; gap:6px;">
@@ -324,7 +343,7 @@
       <div class="card">
         <div class="card-title">공유 메모</div>
         <input id="memoDate" type="date" class="input" style="margin-bottom:8px;">
-        <textarea id="memoText" placeholder="전달사항이나 메모를 입력하세요" class="input"></textarea>
+        <textarea id="memoText" placeholder="전달사항이나 메모 입력" class="input"></textarea>
         <button class="btn-main" onclick="addMemo()">메모 등록</button>
       </div>
       <div id="memoList"></div>
@@ -344,10 +363,41 @@
   </div>
 </div>
 
+<!-- 관리자 설정 모달 -->
+<div id="adminModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-title">관리자 설정</div>
+    <div style="font-size:13px; color:var(--text-sub); margin-bottom:12px;">시크릿 키 변경, 공지 수정 및 멤버 강퇴를 관리합니다.</div>
+    
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">새 시크릿 키 변경</div>
+      <div class="field-row">
+        <input id="newSecretKeyInput" class="input" placeholder="새 시크릿 키 입력" style="flex:1;">
+        <button class="btn-mini" onclick="changeSecretKey()" style="background:var(--primary); color:white; padding:0 14px;">변경</button>
+      </div>
+      <div id="newSecretLinkResult" style="font-size:11px; color:#34c759; margin-top:6px; word-break:break-all;"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">관리자 비밀번호 변경</div>
+      <div class="field-row">
+        <input id="newAdminPinInput" class="input" placeholder="새 관리자 비밀번호" style="flex:1;">
+        <button class="btn-mini" onclick="changeAdminPin()" style="background:var(--primary); color:white; padding:0 14px;">변경</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">등록된 멤버 강퇴 관리</div>
+      <div id="memberKickList" style="display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto;"></div>
+    </div>
+
+    <button class="btn-mini" onclick="closeAdminModal()" style="width:100%; padding:12px; margin-top:6px;">닫기</button>
+  </div>
+</div>
+
 <script>
   const API_URL = "https://economy.insightview.workers.dev";
 
-  // 1. URL 파라미터에서 시크릿 키 추출 및 주소창 깔끔하게 정리
   const urlParams = new URLSearchParams(window.location.search);
   const urlKey = urlParams.get('key');
   if (urlKey) {
@@ -357,9 +407,6 @@
 
   let secretKey = localStorage.getItem('app_secret_key') || '';
   let userName = localStorage.getItem('app_username') || '';
-  let userAvatar = localStorage.getItem('app_avatar') || '🐶';
-  let selectedAvatar = userAvatar;
-
   let schedules = [], settlements = [], memos = [], chatMembers = [];
   let editType = '', editId = null;
 
@@ -381,12 +428,12 @@
         document.getElementById("lockScreen").classList.add("show");
         return;
       }
+      document.getElementById("homeNoticeText").textContent = data.notice || '등록된 공지가 없습니다.';
     } catch (e) {
-      alert("서버와 통신할 수 없습니다.");
+      alert("서버 통신 실패");
       return;
     }
 
-    // 인증 통과 -> 메인 앱 활성화
     document.getElementById("mainApp").classList.add("ready");
 
     const t = today();
@@ -395,19 +442,12 @@
       if (el) el.value = t;
     });
 
-    // 프로필이 없으면 최초 1회 프로필 생성 화면 표시, 있으면 즉시 자동 로그인
     if (!userName) {
       await openProfileSetup();
     } else {
       updateUserBadge();
-      switchTab('schedule');
+      switchTab('home');
     }
-  }
-
-  function selectAvatar(emoji, el) {
-    selectedAvatar = emoji;
-    document.querySelectorAll('.avatar-option').forEach(btn => btn.classList.remove('selected'));
-    el.classList.add('selected');
   }
 
   async function openProfileSetup() {
@@ -426,26 +466,29 @@
 
   async function saveProfile() {
     const inputName = document.getElementById("profileNameInput").value.trim();
-    if (!inputName) return alert("사용하실 이름을 입력해주세요.");
+    if (!inputName) return alert("이름을 입력해주세요.");
 
     showLoading(true);
     try {
       userName = inputName;
-      userAvatar = selectedAvatar;
       localStorage.setItem('app_username', userName);
-      localStorage.setItem('app_avatar', userAvatar);
 
       await api('registerMember', { name: userName });
       updateUserBadge();
       document.getElementById("profileScreen").classList.remove("show");
-      switchTab('schedule');
+      switchTab('home');
+    } catch(e) {
+      alert(e.message);
     } finally {
       showLoading(false);
     }
   }
 
   function updateUserBadge() {
-    document.getElementById("userBadge").textContent = `${userAvatar} ${userName}`;
+    document.getElementById("userBadge").textContent = userName;
+    const isAdmin = (userName === 'S K');
+    document.getElementById("adminBtn").style.display = isAdmin ? 'inline-block' : 'none';
+    document.getElementById("editNoticeBtn").style.display = isAdmin ? 'inline-block' : 'none';
   }
 
   async function api(action, payload = {}) {
@@ -460,9 +503,12 @@
     });
     const data = await res.json();
     if (!data.ok) {
-      if (res.status === 401) {
-        localStorage.removeItem('app_secret_key');
-        location.reload();
+      if (res.status === 401 || res.status === 403) {
+        alert(data.error || "권한이 없습니다.");
+        if (res.status === 401) {
+          localStorage.removeItem('app_secret_key');
+          location.reload();
+        }
       }
       throw new Error(data.error || '오류가 발생했습니다.');
     }
@@ -478,9 +524,104 @@
     document.getElementById("page-" + tab).classList.add("active");
     document.getElementById("tab-" + tab).classList.add("active");
 
+    if (tab === 'home') loadHome();
     if (tab === 'schedule') loadSchedules();
     if (tab === 'settlement') loadSettlements();
     if (tab === 'memo') loadMemos();
+  }
+
+  /* 홈 화면 */
+  async function loadHome() {
+    try {
+      const res = await api('getHomeData');
+      document.getElementById("homeNoticeText").textContent = res.notice || '등록된 공지가 없습니다.';
+      schedules = res.schedules || [];
+      
+      const t = today();
+      const upcoming = schedules.filter(s => s.date >= t);
+      const box = document.getElementById("homeUpcomingSchedules");
+      if (!upcoming.length) { box.innerHTML = '<div class="empty">다가오는 일정이 없습니다.</div>'; return; }
+      box.innerHTML = upcoming.slice(0, 4).map(s => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:0.5px solid rgba(60,60,67,0.06);">
+          <div style="font-weight:600; font-size:14px;">${s.title}</div>
+          <div style="font-size:12px; color:var(--text-sub);">${s.date} ${s.time || ''}</div>
+        </div>
+      `).join('');
+    } catch(e) {}
+  }
+
+  async function openEditNotice() {
+    const cur = document.getElementById("homeNoticeText").textContent;
+    const n = prompt("새로운 공지 내용을 입력하세요:", cur);
+    if (n !== null) {
+      showLoading(true);
+      try {
+        await api('updateNotice', { notice: n });
+        document.getElementById("homeNoticeText").textContent = n;
+      } finally { showLoading(false); }
+    }
+  }
+
+  /* 관리자 설정 모달 */
+  async function openAdminModal() {
+    const pin = prompt("관리자 전용 비밀번호를 입력하세요:", "");
+    if (!pin) return;
+    showLoading(true);
+    try {
+      await api('verifyAdminPin', { pin });
+      document.getElementById("adminModal").classList.add("show");
+      loadMembersForKick();
+    } catch(e) {
+    } finally { showLoading(false); }
+  }
+
+  function closeAdminModal() { document.getElementById("adminModal").classList.remove("show"); }
+
+  async function changeSecretKey() {
+    const newKey = document.getElementById("newSecretKeyInput").value.trim();
+    if (!newKey) return alert("새 시크릿 키를 입력하세요.");
+    if (!confirm("시크릿 키를 변경하면 기존 링크는 무효화됩니다. 변경하시겠습니까?")) return;
+    
+    showLoading(true);
+    try {
+      await api('updateSettings', { newSecretKey: newKey });
+      secretKey = newKey;
+      localStorage.setItem('app_secret_key', newKey);
+      const fullLink = `${window.location.origin}${window.location.pathname}?key=${newKey}`;
+      document.getElementById("newSecretLinkResult").innerHTML = `변경 완료! 새 공지 링크:<br><a href="${fullLink}" target="_blank">${fullLink}</a>`;
+    } finally { showLoading(false); }
+  }
+
+  async function changeAdminPin() {
+    const newPin = document.getElementById("newAdminPinInput").value.trim();
+    if (!newPin) return alert("새 비밀번호를 입력하세요.");
+    showLoading(true);
+    try {
+      await api('updateSettings', { newAdminPin: newPin });
+      alert("관리자 비밀번호가 변경되었습니다.");
+      document.getElementById("newAdminPinInput").value = '';
+    } finally { showLoading(false); }
+  }
+
+  async function loadMembersForKick() {
+    const res = await api('getMembersList');
+    const members = res.data || [];
+    const box = document.getElementById("memberKickList");
+    box.innerHTML = members.map(m => `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#f2f2f7; padding:6px 10px; border-radius:8px; font-size:13px;">
+        <span>${m}</span>
+        ${m !== 'S K' ? `<button class="btn-mini del" onclick="kickMember('${m}')">강퇴</button>` : '<span style="font-size:11px; color:var(--text-sub);">관리자</span>'}
+      </div>
+    `).join('');
+  }
+
+  async function kickMember(name) {
+    if (!confirm(`정말 '${name}' 님을 강퇴하시겠습니까?`)) return;
+    showLoading(true);
+    try {
+      await api('kickMember', { memberName: name });
+      loadMembersForKick();
+    } finally { showLoading(false); }
   }
 
   /* 일정 */
@@ -492,7 +633,7 @@
     box.innerHTML = schedules.map(s => `
       <div class="item-card">
         <div class="item-top">
-          <div class="item-title">📅 ${s.title}</div>
+          <div class="item-title">${s.title}</div>
           <div style="font-size:12px; font-weight:600; color:var(--text-sub);">${s.date} ${s.time || ''}</div>
         </div>
         ${s.updated_by ? `<div class="edit-label">수정: ${s.updated_by} (${s.updated_at ? s.updated_at.slice(5,16) : ''})</div>` : ''}
@@ -511,7 +652,7 @@
     const date = document.getElementById("scheduleDate").value;
     const time = document.getElementById("scheduleTime").value;
     const title = document.getElementById("scheduleTitle").value.trim();
-    if (!date || !title) return alert("날짜와 일정을 입력하세요.");
+    if (!date || !title) return alert("날짜와 내용을 입력하세요.");
     showLoading(true);
     try {
       await api('addSchedule', { date, time, title });
@@ -521,7 +662,7 @@
   }
 
   async function deleteSchedule(id) {
-    if (!confirm("이 일정을 삭제하시겠습니까?")) return;
+    if (!confirm("삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
   }
@@ -579,7 +720,7 @@
   }
 
   async function deleteSettlement(id) {
-    if (!confirm("이 지출 내역을 삭제하시겠습니까?")) return;
+    if (!confirm("삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteSettlement', { id }); await loadSettlements(); } finally { showLoading(false); }
   }
@@ -601,7 +742,7 @@
       box.style.display = 'block';
       let html = `<div style="font-size:13px; line-height:1.7;">총 <b>${res.totalAmount.toLocaleString()}원</b> / ${res.memberCount}명 (1인당 <b>${res.perPerson.toLocaleString()}원</b>)<br><br>`;
       if (res.transfers.length) {
-        html += '<b style="color:#64d2ff;">👉 송금 가이드:</b><br>' + res.transfers.map(t => `• ${t.from} ➡️ <b>${t.to}</b>: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
+        html += '<b style="color:#64d2ff;">송금 가이드:</b><br>' + res.transfers.map(t => `• ${t.from} ➡️ <b>${t.to}</b>: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
       } else html += '추가 정산이 필요 없습니다.';
       html += '</div>';
       box.innerHTML = html;
@@ -632,7 +773,7 @@
   async function addMemo() {
     const date = document.getElementById("memoDate").value;
     const memo = document.getElementById("memoText").value.trim();
-    if (!date || !memo) return alert("메모 내용을 입력하세요.");
+    if (!date || !memo) return alert("내용을 입력하세요.");
     showLoading(true);
     try {
       await api('addMemo', { date, memo });
@@ -642,7 +783,7 @@
   }
 
   async function deleteMemo(id) {
-    if (!confirm("이 메모를 삭제하시겠습니까?")) return;
+    if (!confirm("삭제하시겠습니까?")) return;
     showLoading(true);
     try { await api('deleteMemo', { id }); await loadMemos(); } finally { showLoading(false); }
   }
