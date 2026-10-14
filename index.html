@@ -154,8 +154,7 @@
 </div>
 
 <script>
-  // ⭐ [필수] 본인의 Cloudflare Worker 주소로 변경하세요!
-  const API_URL = "https://emergency-api.본인워커주소.workers.dev";
+  const API_URL = "https://economy.insightview.workers.dev";
 
   let appPin = localStorage.getItem('app_pin') || '';
   let userName = localStorage.getItem('app_username') || '';
@@ -163,7 +162,6 @@
   let editType = '', editId = null;
 
   async function checkAuth() {
-    // 1. PIN 번호 확인
     while (!appPin) {
       const input = prompt("🔒 모임 비밀번호(PIN)를 입력하세요:", "");
       if (input && input.trim()) {
@@ -189,7 +187,6 @@
       }
     }
 
-    // 2. 사용자 이름 확인
     if (!userName) {
       userName = prompt("본인 이름을 입력해주세요 (등록자로 사용됩니다):", "S K");
       if (!userName || !userName.trim()) userName = "익명";
