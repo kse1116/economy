@@ -251,13 +251,12 @@
         <img src="banner.png" alt="경제연구소 세미나" onerror="this.parentElement.style.display='none';">
       </div>
 
+      <!-- 공지사항 카드 (우측 상단 + 버튼 추가) -->
       <div class="card">
-        <div class="card-title">공지사항 게시판</div>
-        <div class="field-row">
-          <input id="noticeDate" type="date" class="input" style="flex:1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="card-title" style="margin-bottom: 0;">공지사항</div>
+          <button class="btn-mini" onclick="openNoticeModal()" style="background: var(--primary); color: white; padding: 6px 12px;">+</button>
         </div>
-        <textarea id="noticeContentInput" placeholder="새 공지 내용을 입력하세요" class="input" style="margin-bottom:8px;"></textarea>
-        <button class="btn-main" onclick="addNotice()">공지 등록</button>
       </div>
 
       <div id="noticeBoardList"></div>
@@ -320,6 +319,19 @@
       <div id="memoList"></div>
     </section>
   </main>
+</div>
+
+<!-- 공지 등록 모달 -->
+<div id="noticeModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-title">새 공지 등록</div>
+    <input id="noticeDate" type="date" class="input" style="margin-bottom:8px;">
+    <textarea id="noticeContentInput" placeholder="공지 내용을 입력하세요" class="input" style="margin-bottom:12px; min-height:100px;"></textarea>
+    <div style="display:flex; gap:8px;">
+      <button class="btn-main" onclick="addNotice()" style="flex:2;">등록</button>
+      <button class="btn-mini" onclick="closeNoticeModal()" style="flex:1; padding:12px; border-radius:11px;">취소</button>
+    </div>
+  </div>
 </div>
 
 <!-- 내 계정 모달 -->
@@ -631,6 +643,13 @@
     } catch(e) {}
   }
 
+  function openNoticeModal() {
+    document.getElementById("noticeModal").classList.add("show");
+  }
+  function closeNoticeModal() {
+    document.getElementById("noticeModal").classList.remove("show");
+  }
+
   async function addNotice() {
     const date = document.getElementById("noticeDate").value;
     const content = document.getElementById("noticeContentInput").value.trim();
@@ -639,6 +658,7 @@
     try {
       await api('addNotice', { date, content });
       document.getElementById("noticeContentInput").value = '';
+      closeNoticeModal();
       await loadHome();
     } finally { showLoading(false); }
   }
@@ -772,7 +792,7 @@
     try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
   }
 
-  /* 정산 (사용 내역 포함) */
+  /* 정산 */
   async function loadSettlements() {
     const [sRes, mRes] = await Promise.all([api('getSettlements'), api('getChatMembers')]);
     settlements = sRes.data || [];
