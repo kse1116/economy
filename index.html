@@ -251,15 +251,14 @@
         <img src="banner.png" alt="경제연구소 세미나" onerror="this.parentElement.style.display='none';">
       </div>
 
-      <!-- 공지사항 카드 (우측 상단 + 버튼 추가) -->
+      <!-- 공지사항 카드 (한 칸으로 통합) -->
       <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <div class="card-title" style="margin-bottom: 0;">공지사항</div>
-          <button class="btn-mini" onclick="openNoticeModal()" style="background: var(--primary); color: white; padding: 6px 12px;">+</button>
+          <button class="btn-mini" onclick="openNoticeModal()" style="background: var(--primary); color: white; padding: 5px 10px;">+</button>
         </div>
+        <div id="noticeBoardList" style="margin-top: 6px;"></div>
       </div>
-
-      <div id="noticeBoardList"></div>
 
       <div class="card">
         <div class="card-title">다가올 일정</div>
@@ -606,7 +605,6 @@
     if (tab === 'memo') loadMemos();
   }
 
-  /* 홈 화면 (공지 게시판 + 다가올 일정) */
   async function loadHome() {
     try {
       const res = await api('getHomeData');
@@ -615,16 +613,14 @@
       
       const noticeBox = document.getElementById("noticeBoardList");
       if (!notices.length) {
-        noticeBox.innerHTML = '<div class="card"><div class="empty">등록된 공지가 없습니다.</div></div>';
+        noticeBox.innerHTML = '<div class="empty" style="padding: 16px 0;">등록된 공지가 없습니다.</div>';
       } else {
         noticeBox.innerHTML = notices.map(n => `
-          <div class="item-card">
-            <div class="item-top">
-              <div class="item-title" style="white-space:pre-wrap;">${n.content}</div>
-            </div>
-            <div class="item-bot">
-              <div class="item-writer">${n.date} · 작성: ${n.user}</div>
-              ${(n.user === userName || userName === ADMIN_ID) ? `<button class="btn-mini del" onclick="deleteNotice(${n.id})">삭제</button>` : ''}
+          <div style="background: #f2f2f7; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;">
+            <div style="font-size: 14px; font-weight: 500; white-space: pre-wrap; line-height: 1.4;">${n.content}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 0.5px solid rgba(60,60,67,0.08);">
+              <span style="font-size: 11px; color: var(--text-sub);">${n.date} · 작성: ${n.user}</span>
+              ${(n.user === userName || userName === ADMIN_ID) ? `<button class="btn-mini del" onclick="deleteNotice(${n.id})" style="padding: 3px 8px; font-size: 11px;">삭제</button>` : ''}
             </div>
           </div>
         `).join('');
@@ -672,7 +668,6 @@
     } finally { showLoading(false); }
   }
 
-  /* 관리자 설정 모달 */
   async function openAdminModal() {
     document.getElementById("adminModal").classList.add("show");
     await loadAdminMembers();
@@ -749,7 +744,6 @@
     } finally { showLoading(false); }
   }
 
-  /* 일정 */
   async function loadSchedules() {
     const res = await api('getSchedules');
     schedules = res.data || [];
@@ -792,7 +786,6 @@
     try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
   }
 
-  /* 정산 */
   async function loadSettlements() {
     const [sRes, mRes] = await Promise.all([api('getSettlements'), api('getChatMembers')]);
     settlements = sRes.data || [];
@@ -894,7 +887,6 @@
     }
   }
 
-  /* 메모 */
   async function loadMemos() {
     const res = await api('getMemos');
     memos = res.data || [];
