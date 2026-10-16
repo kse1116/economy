@@ -24,14 +24,14 @@
       line-height: 1.45;
       -webkit-font-smoothing: antialiased;
     }
-    button, input, textarea { font: inherit; outline: none; }
+    button, input, textarea, select { font: inherit; outline: none; }
     button { border: 0; cursor: pointer; transition: transform 0.1s ease, opacity 0.1s ease; }
     button:active { transform: scale(0.97); opacity: 0.8; }
 
     .app { max-width: 580px; margin: 0 auto; min-height: 100vh; padding-bottom: 50px; display: none; }
     .app.ready { display: block; }
 
-    /* 잠금 화면 */
+    /* 1. 시크릿 링크 미인증 차단 화면 */
     .lock-screen {
       position: fixed; inset: 0; background: var(--bg);
       display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -44,26 +44,37 @@
       border: 0.5px solid var(--border);
     }
 
-    /* 프로필 설정 화면 */
-    .profile-screen {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    /* 2. 프로필 선택 및 로그인 화면 */
+    .login-screen {
+      position: fixed; inset: 0; background: rgba(242, 242, 247, 0.92);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       display: none; align-items: center; justify-content: center;
       padding: 20px; z-index: 250;
     }
-    .profile-screen.show { display: flex; }
-    .profile-card {
+    .login-screen.show { display: flex; }
+    .login-card {
       background: var(--card); border-radius: 24px; padding: 28px 22px;
       max-width: 380px; width: 100%; text-align: center;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+      border: 0.5px solid var(--border);
     }
-    .existing-members {
-      display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px;
+    .profile-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+      margin: 18px 0; max-height: 240px; overflow-y: auto;
     }
-    .existing-chip {
-      font-size: 12px; padding: 5px 10px; border-radius: 12px;
-      background: #f2f2f7; color: var(--text-sub); font-weight: 600; cursor: pointer;
+    .profile-item {
+      padding: 14px 10px; border-radius: 14px; background: #f2f2f7;
+      font-size: 15px; font-weight: 600; color: var(--text);
+      border: 2px solid transparent; cursor: pointer;
+      transition: all 0.15s ease;
     }
+    .profile-item.selected {
+      background: rgba(0, 122, 255, 0.08);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .pw-box { display: none; margin-top: 12px; }
+    .pw-box.show { display: block; }
 
     /* 상단 네비게이션 */
     .header {
@@ -82,7 +93,7 @@
       font-size: 13px; font-weight: 600; padding: 6px 12px;
       border-radius: 16px; background: rgba(0, 122, 255, 0.1); color: var(--primary);
     }
-    .badge-btn.admin { background: rgba(255, 149, 0, 0.12); color: #ff9500; }
+    .badge-btn.admin { background: rgba(28, 28, 30, 0.08); color: var(--text); }
 
     /* 세그먼트 탭 */
     .segmented-tabs {
@@ -104,7 +115,7 @@
     .page { display: none; }
     .page.active { display: block; }
 
-    /* 홈 화면 전용 구성 */
+    /* 홈 화면 구성 */
     .hero-banner {
       width: 100%; border-radius: var(--radius); overflow: hidden;
       margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);
@@ -117,7 +128,7 @@
       margin-bottom: 12px; border: 0.5px solid var(--border);
     }
     .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .notice-title { font-size: 13px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+    .notice-title { font-size: 12px; font-weight: 700; color: var(--text-sub); letter-spacing: 0.3px; }
     .notice-content { font-size: 14px; color: var(--text); white-space: pre-wrap; line-height: 1.5; }
 
     .quick-links {
@@ -128,7 +139,8 @@
       text-align: center; border: 0.5px solid var(--border);
       box-shadow: 0 1px 3px rgba(0,0,0,0.02); cursor: pointer;
     }
-    .quick-link-title { font-size: 15px; font-weight: 700; margin-top: 4px; }
+    .quick-link-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .quick-link-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
     /* 카드 공통 */
     .card {
@@ -211,7 +223,7 @@
 
     .loading {
       position: fixed; inset: 0; background: rgba(255,255,255,0.6);
-      backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 200;
+      backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 400;
       font-size: 13px; font-weight: 600; color: var(--text-sub);
     }
     .loading.show { display: flex; }
@@ -222,7 +234,7 @@
 
 <div id="loading" class="loading">동기화 중...</div>
 
-<!-- 잠금 화면 -->
+<!-- 1. 시크릿 링크 차단 화면 -->
 <div id="lockScreen" class="lock-screen">
   <div class="lock-card">
     <div style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">멤버 전용 공간입니다</div>
@@ -232,25 +244,29 @@
   </div>
 </div>
 
-<!-- 프로필 설정 화면 -->
-<div id="profileScreen" class="profile-screen">
-  <div class="profile-card">
-    <div style="font-size: 19px; font-weight: 700; margin-bottom: 6px;">프로필 설정</div>
-    <div style="font-size: 13px; color: var(--text-sub); margin-bottom: 14px;">사용하실 이름을 입력해주세요.</div>
-    <input id="profileNameInput" class="input" placeholder="이름 입력 (예: S K)" style="text-align:center; font-weight:600; margin-bottom:8px;">
-    <div id="existingMemberBox" class="existing-members"></div>
-    <button class="btn-main" onclick="saveProfile()" style="margin-top:14px;">시작하기</button>
+<!-- 2. 프로필 선택 및 비밀번호 로그인 화면 -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div style="font-size: 19px; font-weight: 700; margin-bottom: 4px;">경제연구소</div>
+    <div style="font-size: 13px; color: var(--text-sub);">본인의 프로필을 선택하고 비밀번호를 입력하세요.</div>
+    
+    <div id="profileGrid" class="profile-grid"></div>
+
+    <div id="pwBox" class="pw-box">
+      <input id="loginPasswordInput" type="password" class="input" placeholder="비밀번호 입력" style="text-align:center; font-weight:600; margin-bottom:8px;" onkeydown="if(event.key==='Enter') submitLogin()">
+      <button class="btn-main" onclick="submitLogin()">로그인</button>
+    </div>
   </div>
 </div>
 
-<!-- 메인 앱 화면 -->
+<!-- 3. 메인 앱 화면 -->
 <div id="mainApp" class="app">
   <header class="header">
     <div class="header-top">
       <div class="header-title">경제연구소</div>
       <div class="header-actions">
         <button id="adminBtn" class="badge-btn admin" onclick="openAdminModal()" style="display:none;">관리</button>
-        <button id="userBadge" class="badge-btn" onclick="openProfileSetup()">프로필</button>
+        <button id="userBadge" class="badge-btn" onclick="openMyAccountModal()">계정</button>
       </div>
     </div>
     <div class="segmented-tabs">
@@ -278,16 +294,16 @@
 
       <div class="quick-links">
         <div class="quick-link-card" onclick="switchTab('schedule')">
-          <div style="font-size:18px;">📅</div>
           <div class="quick-link-title">일정</div>
+          <div class="quick-link-sub">모임 일정 관리</div>
         </div>
         <div class="quick-link-card" onclick="switchTab('settlement')">
-          <div style="font-size:18px;">💰</div>
           <div class="quick-link-title">정산</div>
+          <div class="quick-link-sub">지출 및 N빵 계산</div>
         </div>
         <div class="quick-link-card" onclick="switchTab('memo')">
-          <div style="font-size:18px;">📝</div>
           <div class="quick-link-title">메모</div>
+          <div class="quick-link-sub">공유 메모장</div>
         </div>
       </div>
 
@@ -351,7 +367,60 @@
   </main>
 </div>
 
-<!-- 수정 모달 바텀시트 -->
+<!-- 내 계정 설정 모달 (비밀번호 변경 & 로그아웃) -->
+<div id="myAccountModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-title">내 계정 (<span id="myAccountName"></span>)</div>
+    <div class="card" style="padding:12px; margin-bottom:12px;">
+      <div style="font-size:13px; font-weight:600; margin-bottom:6px;">내 비밀번호 변경</div>
+      <div class="field-row" style="margin-bottom:0;">
+        <input id="myNewPasswordInput" type="password" class="input" placeholder="새 비밀번호 입력" style="flex:1;">
+        <button class="btn-mini" onclick="changeMyPassword()" style="background:var(--primary); color:white; padding:0 14px;">변경</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn-mini del" onclick="logoutUser()" style="flex:1; padding:12px; border-radius:11px;">다른 프로필로 전환 (로그아웃)</button>
+      <button class="btn-mini" onclick="closeMyAccountModal()" style="flex:1; padding:12px; border-radius:11px;">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자(S) 전용 설정 모달 -->
+<div id="adminModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-title">관리자 설정 (S 전용)</div>
+    
+    <!-- 1. 신규 멤버 추가 -->
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">새 멤버 등록</div>
+      <div class="field-row" style="margin-bottom:0;">
+        <input id="newMemberName" class="input" placeholder="이름 (예: JY)" style="flex:1;">
+        <input id="newMemberPw" class="input" placeholder="초기 비번" style="flex:1;">
+        <button class="btn-mini" onclick="adminAddMember()" style="background:var(--primary); color:white; padding:0 14px;">추가</button>
+      </div>
+    </div>
+
+    <!-- 2. 등록된 멤버 목록 (비번 변경 / 삭제) -->
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">멤버 관리 (비번 확인 · 초기화 · 삭제)</div>
+      <div id="adminMemberList" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- 3. 시크릿 키 변경 -->
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">초대 링크 시크릿 키 변경</div>
+      <div class="field-row" style="margin-bottom:0;">
+        <input id="newSecretKeyInput" class="input" placeholder="새 시크릿 키 입력" style="flex:1;">
+        <button class="btn-mini" onclick="changeSecretKey()" style="background:var(--primary); color:white; padding:0 14px;">변경</button>
+      </div>
+      <div id="newSecretLinkResult" style="font-size:11px; color:#34c759; margin-top:6px; word-break:break-all;"></div>
+    </div>
+
+    <button class="btn-mini" onclick="closeAdminModal()" style="width:100%; padding:12px; margin-top:6px;">닫기</button>
+  </div>
+</div>
+
+<!-- 내역 수정 모달 -->
 <div id="editModal" class="modal">
   <div class="sheet">
     <div class="sheet-title">내역 수정</div>
@@ -363,41 +432,11 @@
   </div>
 </div>
 
-<!-- 관리자 설정 모달 -->
-<div id="adminModal" class="modal">
-  <div class="sheet">
-    <div class="sheet-title">관리자 설정</div>
-    <div style="font-size:13px; color:var(--text-sub); margin-bottom:12px;">시크릿 키 변경, 공지 수정 및 멤버 강퇴를 관리합니다.</div>
-    
-    <div class="card" style="margin-bottom:10px; padding:12px;">
-      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">새 시크릿 키 변경</div>
-      <div class="field-row">
-        <input id="newSecretKeyInput" class="input" placeholder="새 시크릿 키 입력" style="flex:1;">
-        <button class="btn-mini" onclick="changeSecretKey()" style="background:var(--primary); color:white; padding:0 14px;">변경</button>
-      </div>
-      <div id="newSecretLinkResult" style="font-size:11px; color:#34c759; margin-top:6px; word-break:break-all;"></div>
-    </div>
-
-    <div class="card" style="margin-bottom:10px; padding:12px;">
-      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">관리자 비밀번호 변경</div>
-      <div class="field-row">
-        <input id="newAdminPinInput" class="input" placeholder="새 관리자 비밀번호" style="flex:1;">
-        <button class="btn-mini" onclick="changeAdminPin()" style="background:var(--primary); color:white; padding:0 14px;">변경</button>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:10px; padding:12px;">
-      <div style="font-weight:600; font-size:13px; margin-bottom:6px;">등록된 멤버 강퇴 관리</div>
-      <div id="memberKickList" style="display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto;"></div>
-    </div>
-
-    <button class="btn-mini" onclick="closeAdminModal()" style="width:100%; padding:12px; margin-top:6px;">닫기</button>
-  </div>
-</div>
-
 <script>
   const API_URL = "https://economy.insightview.workers.dev";
+  const ADMIN_ID = "S";
 
+  // 시크릿 키 파라미터 추출 및 주소창 정리
   const urlParams = new URLSearchParams(window.location.search);
   const urlKey = urlParams.get('key');
   if (urlKey) {
@@ -407,6 +446,10 @@
 
   let secretKey = localStorage.getItem('app_secret_key') || '';
   let userName = localStorage.getItem('app_username') || '';
+  let userPassword = localStorage.getItem('app_password') || '';
+
+  let selectedProfile = '';
+  let publicMembers = [];
   let schedules = [], settlements = [], memos = [], chatMembers = [];
   let editType = '', editId = null;
 
@@ -428,13 +471,12 @@
         document.getElementById("lockScreen").classList.add("show");
         return;
       }
+      publicMembers = data.members || [ADMIN_ID];
       document.getElementById("homeNoticeText").textContent = data.notice || '등록된 공지가 없습니다.';
     } catch (e) {
-      alert("서버 통신 실패");
+      alert("서버 통신에 실패했습니다.");
       return;
     }
-
-    document.getElementById("mainApp").classList.add("ready");
 
     const t = today();
     ['scheduleDate', 'settlementDate', 'memoDate'].forEach(id => {
@@ -442,59 +484,141 @@
       if (el) el.value = t;
     });
 
-    if (!userName) {
-      await openProfileSetup();
-    } else {
-      updateUserBadge();
-      switchTab('home');
+    // 저장된 로그인 정보가 있으면 자동 로그인 검증
+    if (userName && userPassword) {
+      try {
+        const loginRes = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'login', key: secretKey, name: userName, password: userPassword })
+        });
+        const loginData = await loginRes.json();
+        if (loginData.ok) {
+          enterMainApp();
+          return;
+        }
+      } catch (e) {}
     }
+
+    // 자동 로그인 정보가 없거나 만료된 경우 프로필 선택 화면 표시
+    openLoginScreen();
   }
 
-  async function openProfileSetup() {
-    document.getElementById("profileNameInput").value = userName;
-    try {
-      const res = await api('getChatMembers');
-      chatMembers = res.data || [];
-      const box = document.getElementById("existingMemberBox");
-      if (chatMembers.length) {
-        box.innerHTML = `<div style="width:100%; font-size:11px; color:var(--text-sub); margin-top:4px;">기존 멤버 선택</div>` +
-          chatMembers.map(m => `<span class="existing-chip" onclick="document.getElementById('profileNameInput').value='${m}'">${m}</span>`).join('');
-      }
-    } catch(e) {}
-    document.getElementById("profileScreen").classList.add("show");
+  function openLoginScreen() {
+    selectedProfile = '';
+    document.getElementById("pwBox").classList.remove("show");
+    document.getElementById("loginPasswordInput").value = '';
+
+    const grid = document.getElementById("profileGrid");
+    grid.innerHTML = publicMembers.map(m => `
+      <div class="profile-item" onclick="selectProfile('${m}', this)">${m}</div>
+    `).join('');
+
+    document.getElementById("loginScreen").classList.add("show");
   }
 
-  async function saveProfile() {
-    const inputName = document.getElementById("profileNameInput").value.trim();
-    if (!inputName) return alert("이름을 입력해주세요.");
+  function selectProfile(name, el) {
+    selectedProfile = name;
+    document.querySelectorAll('.profile-item').forEach(item => item.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById("pwBox").classList.add("show");
+    const pwInput = document.getElementById("loginPasswordInput");
+    pwInput.placeholder = `${name} 비밀번호 입력`;
+    pwInput.value = '';
+    pwInput.focus();
+  }
+
+  async function submitLogin() {
+    if (!selectedProfile) return alert("프로필을 먼저 선택해주세요.");
+    const pw = document.getElementById("loginPasswordInput").value.trim();
+    if (!pw) return alert("비밀번호를 입력해주세요.");
 
     showLoading(true);
     try {
-      userName = inputName;
-      localStorage.setItem('app_username', userName);
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', key: secretKey, name: selectedProfile, password: pw })
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        alert(data.error || "로그인에 실패했습니다.");
+        return;
+      }
 
-      await api('registerMember', { name: userName });
-      updateUserBadge();
-      document.getElementById("profileScreen").classList.remove("show");
-      switchTab('home');
-    } catch(e) {
-      alert(e.message);
+      userName = selectedProfile;
+      userPassword = pw;
+      localStorage.setItem('app_username', userName);
+      localStorage.setItem('app_password', userPassword);
+
+      document.getElementById("loginScreen").classList.remove("show");
+      enterMainApp();
     } finally {
       showLoading(false);
     }
   }
 
-  function updateUserBadge() {
+  function enterMainApp() {
+    document.getElementById("mainApp").classList.add("ready");
     document.getElementById("userBadge").textContent = userName;
-    const isAdmin = (userName === 'S K');
+    const isAdmin = (userName === ADMIN_ID);
     document.getElementById("adminBtn").style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById("editNoticeBtn").style.display = isAdmin ? 'inline-block' : 'none';
+    switchTab('home');
   }
 
+  /* 내 계정 모달 (비밀번호 변경 & 로그아웃) */
+  function openMyAccountModal() {
+    document.getElementById("myAccountName").textContent = userName;
+    document.getElementById("myNewPasswordInput").value = '';
+    document.getElementById("myAccountModal").classList.add("show");
+  }
+  function closeMyAccountModal() {
+    document.getElementById("myAccountModal").classList.remove("show");
+  }
+
+  async function changeMyPassword() {
+    const newPassword = document.getElementById("myNewPasswordInput").value.trim();
+    if (!newPassword) return alert("변경할 새 비밀번호를 입력해주세요.");
+    showLoading(true);
+    try {
+      const res = await api('changeMyPassword', { newPassword });
+      userPassword = res.newPassword;
+      localStorage.setItem('app_password', userPassword);
+      alert("비밀번호가 변경되었습니다.");
+      closeMyAccountModal();
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  async function logoutUser() {
+    localStorage.removeItem('app_username');
+    localStorage.removeItem('app_password');
+    userName = '';
+    userPassword = '';
+    closeMyAccountModal();
+    
+    // 최신 멤버 목록 다시 불러오기
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getPublicMembers', key: secretKey })
+      });
+      const data = await res.json();
+      if (data.ok) publicMembers = data.data || [ADMIN_ID];
+    } catch (e) {}
+
+    openLoginScreen();
+  }
+
+  /* 공통 API 통신 */
   async function api(action, payload = {}) {
     payload.action = action;
     payload.key = secretKey;
     payload.user = userName;
+    payload.password = userPassword;
 
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -503,12 +627,12 @@
     });
     const data = await res.json();
     if (!data.ok) {
-      if (res.status === 401 || res.status === 403) {
-        alert(data.error || "권한이 없습니다.");
-        if (res.status === 401) {
-          localStorage.removeItem('app_secret_key');
-          location.reload();
-        }
+      alert(data.error || "오류가 발생했습니다.");
+      if (res.status === 401) {
+        localStorage.removeItem('app_secret_key');
+        location.reload();
+      } else if (data.authFailed) {
+        logoutUser();
       }
       throw new Error(data.error || '오류가 발생했습니다.');
     }
@@ -562,20 +686,67 @@
     }
   }
 
-  /* 관리자 설정 모달 */
+  /* 관리자(S) 전용 모달 */
   async function openAdminModal() {
-    const pin = prompt("관리자 전용 비밀번호를 입력하세요:", "");
-    if (!pin) return;
+    document.getElementById("adminModal").classList.add("show");
+    await loadAdminMembers();
+  }
+  function closeAdminModal() { document.getElementById("adminModal").classList.remove("show"); }
+
+  async function loadAdminMembers() {
+    const res = await api('adminGetMembers');
+    const list = res.data || [];
+    publicMembers = list.map(m => m.name);
+    const box = document.getElementById("adminMemberList");
+    box.innerHTML = list.map(m => `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#f2f2f7; padding:8px 10px; border-radius:8px; font-size:13px;">
+        <div>
+          <span style="font-weight:700;">${m.name}</span>
+          <span style="font-size:11px; color:var(--text-sub); margin-left:6px;">비번: ${m.password}</span>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <button class="btn-mini" onclick="adminResetPw('${m.name}')" style="background:white;">비번변경</button>
+          ${m.name !== ADMIN_ID ? `<button class="btn-mini del" onclick="adminDeleteMember('${m.name}')">삭제</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function adminAddMember() {
+    const newName = document.getElementById("newMemberName").value.trim();
+    const initPassword = document.getElementById("newMemberPw").value.trim();
+    if (!newName || !initPassword) return alert("이름과 초기 비밀번호를 모두 입력하세요.");
     showLoading(true);
     try {
-      await api('verifyAdminPin', { pin });
-      document.getElementById("adminModal").classList.add("show");
-      loadMembersForKick();
-    } catch(e) {
+      await api('adminAddMember', { newName, initPassword });
+      document.getElementById("newMemberName").value = '';
+      document.getElementById("newMemberPw").value = '';
+      await loadAdminMembers();
     } finally { showLoading(false); }
   }
 
-  function closeAdminModal() { document.getElementById("adminModal").classList.remove("show"); }
+  async function adminResetPw(targetName) {
+    const newPassword = prompt(`'${targetName}' 님의 새 비밀번호를 입력하세요:`, "1234");
+    if (!newPassword || !newPassword.trim()) return;
+    showLoading(true);
+    try {
+      await api('adminResetMemberPassword', { targetName, newPassword: newPassword.trim() });
+      if (targetName === userName) {
+        userPassword = newPassword.trim();
+        localStorage.setItem('app_password', userPassword);
+      }
+      await loadAdminMembers();
+    } finally { showLoading(false); }
+  }
+
+  async function adminDeleteMember(targetName) {
+    if (!confirm(`정말 '${targetName}' 계정을 삭제하시겠습니까?`)) return;
+    showLoading(true);
+    try {
+      await api('adminDeleteMember', { targetName });
+      await loadAdminMembers();
+    } finally { showLoading(false); }
+  }
 
   async function changeSecretKey() {
     const newKey = document.getElementById("newSecretKeyInput").value.trim();
@@ -589,38 +760,6 @@
       localStorage.setItem('app_secret_key', newKey);
       const fullLink = `${window.location.origin}${window.location.pathname}?key=${newKey}`;
       document.getElementById("newSecretLinkResult").innerHTML = `변경 완료! 새 공지 링크:<br><a href="${fullLink}" target="_blank">${fullLink}</a>`;
-    } finally { showLoading(false); }
-  }
-
-  async function changeAdminPin() {
-    const newPin = document.getElementById("newAdminPinInput").value.trim();
-    if (!newPin) return alert("새 비밀번호를 입력하세요.");
-    showLoading(true);
-    try {
-      await api('updateSettings', { newAdminPin: newPin });
-      alert("관리자 비밀번호가 변경되었습니다.");
-      document.getElementById("newAdminPinInput").value = '';
-    } finally { showLoading(false); }
-  }
-
-  async function loadMembersForKick() {
-    const res = await api('getMembersList');
-    const members = res.data || [];
-    const box = document.getElementById("memberKickList");
-    box.innerHTML = members.map(m => `
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#f2f2f7; padding:6px 10px; border-radius:8px; font-size:13px;">
-        <span>${m}</span>
-        ${m !== 'S K' ? `<button class="btn-mini del" onclick="kickMember('${m}')">강퇴</button>` : '<span style="font-size:11px; color:var(--text-sub);">관리자</span>'}
-      </div>
-    `).join('');
-  }
-
-  async function kickMember(name) {
-    if (!confirm(`정말 '${name}' 님을 강퇴하시겠습니까?`)) return;
-    showLoading(true);
-    try {
-      await api('kickMember', { memberName: name });
-      loadMembersForKick();
     } finally { showLoading(false); }
   }
 
@@ -742,7 +881,7 @@
       box.style.display = 'block';
       let html = `<div style="font-size:13px; line-height:1.7;">총 <b>${res.totalAmount.toLocaleString()}원</b> / ${res.memberCount}명 (1인당 <b>${res.perPerson.toLocaleString()}원</b>)<br><br>`;
       if (res.transfers.length) {
-        html += '<b style="color:#64d2ff;">송금 가이드:</b><br>' + res.transfers.map(t => `• ${t.from} ➡️ <b>${t.to}</b>: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
+        html += '<b style="color:#64d2ff;">송금 가이드:</b><br>' + res.transfers.map(t => `• ${t.from} → <b>${t.to}</b>: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
       } else html += '추가 정산이 필요 없습니다.';
       html += '</div>';
       box.innerHTML = html;
