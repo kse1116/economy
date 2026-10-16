@@ -31,7 +31,6 @@
     .app { max-width: 580px; margin: 0 auto; min-height: 100vh; padding-bottom: 50px; display: none; }
     .app.ready { display: block; }
 
-    /* 1. 시크릿 링크 미인증 차단 화면 */
     .lock-screen {
       position: fixed; inset: 0; background: var(--bg);
       display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -44,7 +43,6 @@
       border: 0.5px solid var(--border);
     }
 
-    /* 2. 프로필 선택 및 로그인 화면 */
     .login-screen {
       position: fixed; inset: 0; background: rgba(242, 242, 247, 0.92);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -76,7 +74,6 @@
     .pw-box { display: none; margin-top: 12px; }
     .pw-box.show { display: block; }
 
-    /* 상단 네비게이션 */
     .header {
       position: sticky; top: 0; z-index: 50;
       background: rgba(242, 242, 247, 0.85);
@@ -95,7 +92,6 @@
     }
     .badge-btn.admin { background: rgba(28, 28, 30, 0.08); color: var(--text); }
 
-    /* 세그먼트 탭 */
     .segmented-tabs {
       display: flex; background: rgba(118, 118, 128, 0.12);
       border-radius: 9px; padding: 2px;
@@ -110,12 +106,10 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
 
-    /* 본문 */
     .content { padding: 14px 16px; }
     .page { display: none; }
     .page.active { display: block; }
 
-    /* 홈 화면 구성 */
     .hero-banner {
       width: 100%; border-radius: var(--radius); overflow: hidden;
       margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);
@@ -142,7 +136,6 @@
     .quick-link-title { font-size: 15px; font-weight: 700; color: var(--text); }
     .quick-link-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-    /* 카드 공통 */
     .card {
       background: var(--card); border-radius: var(--radius);
       padding: 16px; margin-bottom: 12px;
@@ -166,7 +159,6 @@
       font-size: 14px; font-weight: 600; margin-top: 4px;
     }
 
-    /* 리스트 아이템 카드 */
     .item-card {
       background: var(--card); border-radius: var(--radius);
       padding: 14px 16px; margin-bottom: 8px;
@@ -197,7 +189,6 @@
     }
     .btn-mini.del { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
 
-    /* 정산 전용 */
     .calc-container {
       background: #1c1c1e; color: white;
       border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
@@ -209,7 +200,6 @@
     }
     .member-chip input { accent-color: var(--primary); }
 
-    /* 모달 */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.3);
       backdrop-filter: blur(6px); display: none; align-items: flex-end; z-index: 100;
@@ -234,7 +224,6 @@
 
 <div id="loading" class="loading">동기화 중...</div>
 
-<!-- 1. 시크릿 링크 차단 화면 -->
 <div id="lockScreen" class="lock-screen">
   <div class="lock-card">
     <div style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">멤버 전용 공간입니다</div>
@@ -244,7 +233,6 @@
   </div>
 </div>
 
-<!-- 2. 프로필 선택 및 비밀번호 로그인 화면 -->
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
     <div style="font-size: 19px; font-weight: 700; margin-bottom: 4px;">경제연구소</div>
@@ -259,7 +247,6 @@
   </div>
 </div>
 
-<!-- 3. 메인 앱 화면 -->
 <div id="mainApp" class="app">
   <header class="header">
     <div class="header-top">
@@ -278,7 +265,6 @@
   </header>
 
   <main class="content">
-    <!-- 홈 탭 -->
     <section id="page-home" class="page active">
       <div class="hero-banner">
         <img src="banner.png" alt="경제연구소 세미나" onerror="this.parentElement.style.display='none';">
@@ -313,7 +299,6 @@
       </div>
     </section>
 
-    <!-- 일정 탭 -->
     <section id="page-schedule" class="page">
       <div class="card">
         <div class="card-title">새 일정 등록</div>
@@ -327,7 +312,6 @@
       <div id="scheduleList"></div>
     </section>
 
-    <!-- 정산 탭 -->
     <section id="page-settlement" class="page">
       <div class="calc-container">
         <div style="font-size:15px; font-weight:700; margin-bottom:8px;">N빵 계산기</div>
@@ -354,7 +338,6 @@
       <div id="settlementList"></div>
     </section>
 
-    <!-- 메모 탭 -->
     <section id="page-memo" class="page">
       <div class="card">
         <div class="card-title">공유 메모</div>
@@ -367,7 +350,6 @@
   </main>
 </div>
 
-<!-- 내 계정 설정 모달 (비밀번호 변경 & 로그아웃) -->
 <div id="myAccountModal" class="modal">
   <div class="sheet">
     <div class="sheet-title">내 계정 (<span id="myAccountName"></span>)</div>
@@ -385,12 +367,10 @@
   </div>
 </div>
 
-<!-- 관리자(S) 전용 설정 모달 -->
 <div id="adminModal" class="modal">
   <div class="sheet">
     <div class="sheet-title">관리자 설정 (S 전용)</div>
     
-    <!-- 1. 신규 멤버 추가 -->
     <div class="card" style="margin-bottom:10px; padding:12px;">
       <div style="font-weight:600; font-size:13px; margin-bottom:6px;">새 멤버 등록</div>
       <div class="field-row" style="margin-bottom:0;">
@@ -400,13 +380,11 @@
       </div>
     </div>
 
-    <!-- 2. 등록된 멤버 목록 (비번 변경 / 삭제) -->
     <div class="card" style="margin-bottom:10px; padding:12px;">
       <div style="font-weight:600; font-size:13px; margin-bottom:6px;">멤버 관리 (비번 확인 · 초기화 · 삭제)</div>
       <div id="adminMemberList" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;"></div>
     </div>
 
-    <!-- 3. 시크릿 키 변경 -->
     <div class="card" style="margin-bottom:10px; padding:12px;">
       <div style="font-weight:600; font-size:13px; margin-bottom:6px;">초대 링크 시크릿 키 변경</div>
       <div class="field-row" style="margin-bottom:0;">
@@ -420,7 +398,6 @@
   </div>
 </div>
 
-<!-- 내역 수정 모달 -->
 <div id="editModal" class="modal">
   <div class="sheet">
     <div class="sheet-title">내역 수정</div>
@@ -436,7 +413,6 @@
   const API_URL = "https://economy.insightview.workers.dev";
   const ADMIN_ID = "S";
 
-  // 시크릿 키 파라미터 추출 및 주소창 정리
   const urlParams = new URLSearchParams(window.location.search);
   const urlKey = urlParams.get('key');
   if (urlKey) {
@@ -484,7 +460,6 @@
       if (el) el.value = t;
     });
 
-    // 저장된 로그인 정보가 있으면 자동 로그인 검증
     if (userName && userPassword) {
       try {
         const loginRes = await fetch(API_URL, {
@@ -500,7 +475,6 @@
       } catch (e) {}
     }
 
-    // 자동 로그인 정보가 없거나 만료된 경우 프로필 선택 화면 표시
     openLoginScreen();
   }
 
@@ -567,7 +541,6 @@
     switchTab('home');
   }
 
-  /* 내 계정 모달 (비밀번호 변경 & 로그아웃) */
   function openMyAccountModal() {
     document.getElementById("myAccountName").textContent = userName;
     document.getElementById("myNewPasswordInput").value = '';
@@ -599,7 +572,6 @@
     userPassword = '';
     closeMyAccountModal();
     
-    // 최신 멤버 목록 다시 불러오기
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -613,7 +585,6 @@
     openLoginScreen();
   }
 
-  /* 공통 API 통신 */
   async function api(action, payload = {}) {
     payload.action = action;
     payload.key = secretKey;
@@ -654,7 +625,6 @@
     if (tab === 'memo') loadMemos();
   }
 
-  /* 홈 화면 */
   async function loadHome() {
     try {
       const res = await api('getHomeData');
@@ -686,7 +656,6 @@
     }
   }
 
-  /* 관리자(S) 전용 모달 */
   async function openAdminModal() {
     document.getElementById("adminModal").classList.add("show");
     await loadAdminMembers();
@@ -763,7 +732,6 @@
     } finally { showLoading(false); }
   }
 
-  /* 일정 */
   async function loadSchedules() {
     const res = await api('getSchedules');
     schedules = res.data || [];
@@ -806,7 +774,6 @@
     try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
   }
 
-  /* 정산 */
   async function loadSettlements() {
     const [sRes, mRes] = await Promise.all([api('getSettlements'), api('getChatMembers')]);
     settlements = sRes.data || [];
@@ -879,16 +846,34 @@
       const res = await api('calculateSettlement', { selectedIds: sIds, participants: mems });
       const box = document.getElementById("calcResultBox");
       box.style.display = 'block';
-      let html = `<div style="font-size:13px; line-height:1.7;">총 <b>${res.totalAmount.toLocaleString()}원</b> / ${res.memberCount}명 (1인당 <b>${res.perPerson.toLocaleString()}원</b>)<br><br>`;
+
+      let resultText = `[정산 완료] 총 ${res.totalAmount.toLocaleString()}원 • 참여: ${res.memberCount}명 (1인당 ${res.perPerson.toLocaleString()}원)`;
       if (res.transfers.length) {
-        html += '<b style="color:#64d2ff;">송금 가이드:</b><br>' + res.transfers.map(t => `• ${t.from} → <b>${t.to}</b>: <b>${t.amount.toLocaleString()}원</b>`).join('<br>');
-      } else html += '추가 정산이 필요 없습니다.';
-      html += '</div>';
+        resultText += '\n[송금 가이드]\n' + res.transfers.map(t => `• ${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
+      } else {
+        resultText += '\n추가 정산이 필요 없습니다.';
+      }
+
+      let html = `<div style="font-size:13px; line-height:1.7; white-space:pre-wrap;">${resultText.replace(/\n/g, '<br>')}</div>`;
+      html += `<button class="btn-mini" onclick="saveSettlementToMemo(\`${encodeURIComponent(resultText)}\`)" style="margin-top:10px; background:var(--primary); color:white; width:100%; padding:8px;">이 정산결과를 메모에 바로 등록</button>`;
+      
       box.innerHTML = html;
     } finally { showLoading(false); }
   }
 
-  /* 메모 */
+  async function saveSettlementToMemo(encodedText) {
+    const memoText = decodeURIComponent(encodedText);
+    const date = today();
+    showLoading(true);
+    try {
+      await api('addMemo', { date, memo: memoText });
+      alert("정산 결과가 공유 메모에 등록되었습니다.");
+      switchTab('memo');
+    } finally {
+      showLoading(false);
+    }
+  }
+
   async function loadMemos() {
     const res = await api('getMemos');
     memos = res.data || [];
@@ -927,7 +912,6 @@
     try { await api('deleteMemo', { id }); await loadMemos(); } finally { showLoading(false); }
   }
 
-  /* 수정 모달 */
   function openEdit(type, id) {
     editType = type; editId = id;
     const fields = document.getElementById("modalFields");
