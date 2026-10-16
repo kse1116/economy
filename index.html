@@ -64,7 +64,6 @@
       padding: 14px 10px; border-radius: 14px; background: #f2f2f7;
       font-size: 15px; font-weight: 600; color: var(--text);
       border: 2px solid transparent; cursor: pointer;
-      transition: all 0.15s ease;
     }
     .profile-item.selected {
       background: rgba(0, 122, 255, 0.08);
@@ -116,25 +115,6 @@
       border: 0.5px solid var(--border); background: var(--card);
     }
     .hero-banner img { width: 100%; height: auto; display: block; object-fit: cover; }
-
-    .notice-card {
-      background: var(--card); border-radius: var(--radius); padding: 16px;
-      margin-bottom: 12px; border: 0.5px solid var(--border);
-    }
-    .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .notice-title { font-size: 12px; font-weight: 700; color: var(--text-sub); letter-spacing: 0.3px; }
-    .notice-content { font-size: 14px; color: var(--text); white-space: pre-wrap; line-height: 1.5; }
-
-    .quick-links {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;
-    }
-    .quick-link-card {
-      background: var(--card); border-radius: var(--radius); padding: 16px 12px;
-      text-align: center; border: 0.5px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02); cursor: pointer;
-    }
-    .quick-link-title { font-size: 15px; font-weight: 700; color: var(--text); }
-    .quick-link-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
     .card {
       background: var(--card); border-radius: var(--radius);
@@ -265,33 +245,22 @@
   </header>
 
   <main class="content">
+    <!-- 홈 탭 -->
     <section id="page-home" class="page active">
       <div class="hero-banner">
         <img src="banner.png" alt="경제연구소 세미나" onerror="this.parentElement.style.display='none';">
       </div>
 
-      <div class="notice-card">
-        <div class="notice-header">
-          <div class="notice-title">공지사항</div>
-          <button id="editNoticeBtn" class="btn-mini" onclick="openEditNotice()" style="display:none;">편집</button>
+      <div class="card">
+        <div class="card-title">공지사항 게시판</div>
+        <div class="field-row">
+          <input id="noticeDate" type="date" class="input" style="flex:1;">
         </div>
-        <div id="homeNoticeText" class="notice-content">등록된 공지가 없습니다.</div>
+        <textarea id="noticeContentInput" placeholder="새 공지 내용을 입력하세요" class="input" style="margin-bottom:8px;"></textarea>
+        <button class="btn-main" onclick="addNotice()">공지 등록</button>
       </div>
 
-      <div class="quick-links">
-        <div class="quick-link-card" onclick="switchTab('schedule')">
-          <div class="quick-link-title">일정</div>
-          <div class="quick-link-sub">모임 일정 관리</div>
-        </div>
-        <div class="quick-link-card" onclick="switchTab('settlement')">
-          <div class="quick-link-title">정산</div>
-          <div class="quick-link-sub">지출 및 N빵 계산</div>
-        </div>
-        <div class="quick-link-card" onclick="switchTab('memo')">
-          <div class="quick-link-title">메모</div>
-          <div class="quick-link-sub">공유 메모장</div>
-        </div>
-      </div>
+      <div id="noticeBoardList"></div>
 
       <div class="card">
         <div class="card-title">다가올 일정</div>
@@ -299,6 +268,7 @@
       </div>
     </section>
 
+    <!-- 일정 탭 -->
     <section id="page-schedule" class="page">
       <div class="card">
         <div class="card-title">새 일정 등록</div>
@@ -312,6 +282,7 @@
       <div id="scheduleList"></div>
     </section>
 
+    <!-- 정산 탭 -->
     <section id="page-settlement" class="page">
       <div class="calc-container">
         <div style="font-size:15px; font-weight:700; margin-bottom:8px;">N빵 계산기</div>
@@ -338,6 +309,7 @@
       <div id="settlementList"></div>
     </section>
 
+    <!-- 메모 탭 -->
     <section id="page-memo" class="page">
       <div class="card">
         <div class="card-title">공유 메모</div>
@@ -350,6 +322,7 @@
   </main>
 </div>
 
+<!-- 내 계정 모달 -->
 <div id="myAccountModal" class="modal">
   <div class="sheet">
     <div class="sheet-title">내 계정 (<span id="myAccountName"></span>)</div>
@@ -367,6 +340,7 @@
   </div>
 </div>
 
+<!-- 관리자 모달 -->
 <div id="adminModal" class="modal">
   <div class="sheet">
     <div class="sheet-title">관리자 설정 (S 전용)</div>
@@ -398,6 +372,7 @@
   </div>
 </div>
 
+<!-- 내역 수정 모달 -->
 <div id="editModal" class="modal">
   <div class="sheet">
     <div class="sheet-title">내역 수정</div>
@@ -426,7 +401,7 @@
 
   let selectedProfile = '';
   let publicMembers = [];
-  let schedules = [], settlements = [], memos = [], chatMembers = [];
+  let schedules = [], settlements = [], memos = [], chatMembers = [], notices = [];
   let editType = '', editId = null;
 
   async function initApp() {
@@ -448,14 +423,13 @@
         return;
       }
       publicMembers = data.members || [ADMIN_ID];
-      document.getElementById("homeNoticeText").textContent = data.notice || '등록된 공지가 없습니다.';
     } catch (e) {
       alert("서버 통신에 실패했습니다.");
       return;
     }
 
     const t = today();
-    ['scheduleDate', 'settlementDate', 'memoDate'].forEach(id => {
+    ['scheduleDate', 'settlementDate', 'memoDate', 'noticeDate'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = t;
     });
@@ -537,7 +511,6 @@
     document.getElementById("userBadge").textContent = userName;
     const isAdmin = (userName === ADMIN_ID);
     document.getElementById("adminBtn").style.display = isAdmin ? 'inline-block' : 'none';
-    document.getElementById("editNoticeBtn").style.display = isAdmin ? 'inline-block' : 'none';
     switchTab('home');
   }
 
@@ -546,9 +519,7 @@
     document.getElementById("myNewPasswordInput").value = '';
     document.getElementById("myAccountModal").classList.add("show");
   }
-  function closeMyAccountModal() {
-    document.getElementById("myAccountModal").classList.remove("show");
-  }
+  function closeMyAccountModal() { document.getElementById("myAccountModal").classList.remove("show"); }
 
   async function changeMyPassword() {
     const newPassword = document.getElementById("myNewPasswordInput").value.trim();
@@ -560,9 +531,7 @@
       localStorage.setItem('app_password', userPassword);
       alert("비밀번호가 변경되었습니다.");
       closeMyAccountModal();
-    } finally {
-      showLoading(false);
-    }
+    } finally { showLoading(false); }
   }
 
   async function logoutUser() {
@@ -625,17 +594,35 @@
     if (tab === 'memo') loadMemos();
   }
 
+  /* 홈 화면 (공지 게시판 + 다가올 일정) */
   async function loadHome() {
     try {
       const res = await api('getHomeData');
-      document.getElementById("homeNoticeText").textContent = res.notice || '등록된 공지가 없습니다.';
+      notices = res.notices || [];
       schedules = res.schedules || [];
       
+      const noticeBox = document.getElementById("noticeBoardList");
+      if (!notices.length) {
+        noticeBox.innerHTML = '<div class="card"><div class="empty">등록된 공지가 없습니다.</div></div>';
+      } else {
+        noticeBox.innerHTML = notices.map(n => `
+          <div class="item-card">
+            <div class="item-top">
+              <div class="item-title" style="white-space:pre-wrap;">${n.content}</div>
+            </div>
+            <div class="item-bot">
+              <div class="item-writer">${n.date} · 작성: ${n.user}</div>
+              ${(n.user === userName || userName === ADMIN_ID) ? `<button class="btn-mini del" onclick="deleteNotice(${n.id})">삭제</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+
       const t = today();
       const upcoming = schedules.filter(s => s.date >= t);
-      const box = document.getElementById("homeUpcomingSchedules");
-      if (!upcoming.length) { box.innerHTML = '<div class="empty">다가오는 일정이 없습니다.</div>'; return; }
-      box.innerHTML = upcoming.slice(0, 4).map(s => `
+      const schedBox = document.getElementById("homeUpcomingSchedules");
+      if (!upcoming.length) { schedBox.innerHTML = '<div class="empty">다가오는 일정이 없습니다.</div>'; return; }
+      schedBox.innerHTML = upcoming.slice(0, 4).map(s => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:0.5px solid rgba(60,60,67,0.06);">
           <div style="font-weight:600; font-size:14px;">${s.title}</div>
           <div style="font-size:12px; color:var(--text-sub);">${s.date} ${s.time || ''}</div>
@@ -644,18 +631,28 @@
     } catch(e) {}
   }
 
-  async function openEditNotice() {
-    const cur = document.getElementById("homeNoticeText").textContent;
-    const n = prompt("새로운 공지 내용을 입력하세요:", cur);
-    if (n !== null) {
-      showLoading(true);
-      try {
-        await api('updateNotice', { notice: n });
-        document.getElementById("homeNoticeText").textContent = n;
-      } finally { showLoading(false); }
-    }
+  async function addNotice() {
+    const date = document.getElementById("noticeDate").value;
+    const content = document.getElementById("noticeContentInput").value.trim();
+    if (!date || !content) return alert("날짜와 공지 내용을 입력하세요.");
+    showLoading(true);
+    try {
+      await api('addNotice', { date, content });
+      document.getElementById("noticeContentInput").value = '';
+      await loadHome();
+    } finally { showLoading(false); }
   }
 
+  async function deleteNotice(id) {
+    if (!confirm("공지를 삭제하시겠습니까?")) return;
+    showLoading(true);
+    try {
+      await api('deleteNotice', { id });
+      await loadHome();
+    } finally { showLoading(false); }
+  }
+
+  /* 관리자 설정 모달 */
   async function openAdminModal() {
     document.getElementById("adminModal").classList.add("show");
     await loadAdminMembers();
@@ -732,6 +729,7 @@
     } finally { showLoading(false); }
   }
 
+  /* 일정 */
   async function loadSchedules() {
     const res = await api('getSchedules');
     schedules = res.data || [];
@@ -774,6 +772,7 @@
     try { await api('deleteSchedule', { id }); await loadSchedules(); } finally { showLoading(false); }
   }
 
+  /* 정산 (사용 내역 포함) */
   async function loadSettlements() {
     const [sRes, mRes] = await Promise.all([api('getSettlements'), api('getChatMembers')]);
     settlements = sRes.data || [];
@@ -847,11 +846,12 @@
       const box = document.getElementById("calcResultBox");
       box.style.display = 'block';
 
-      let resultText = `[정산 완료] 총 ${res.totalAmount.toLocaleString()}원 • 참여: ${res.memberCount}명 (1인당 ${res.perPerson.toLocaleString()}원)`;
+      let itemsSummary = (res.items || []).map(i => `• ${i.content} (${Number(i.amount).toLocaleString()}원 / ${i.user})`).join('\n');
+      let resultText = `[정산 완료]\n[사용 내역]\n${itemsSummary}\n\n총 지출: ${res.totalAmount.toLocaleString()}원 • ${res.memberCount}명 (1인당 ${res.perPerson.toLocaleString()}원)`;
       if (res.transfers.length) {
-        resultText += '\n[송금 가이드]\n' + res.transfers.map(t => `• ${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
+        resultText += '\n\n[송금 가이드]\n' + res.transfers.map(t => `• ${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
       } else {
-        resultText += '\n추가 정산이 필요 없습니다.';
+        resultText += '\n\n추가 정산이 필요 없습니다.';
       }
 
       let html = `<div style="font-size:13px; line-height:1.7; white-space:pre-wrap;">${resultText.replace(/\n/g, '<br>')}</div>`;
@@ -874,6 +874,7 @@
     }
   }
 
+  /* 메모 */
   async function loadMemos() {
     const res = await api('getMemos');
     memos = res.data || [];
